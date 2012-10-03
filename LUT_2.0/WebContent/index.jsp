@@ -4,7 +4,6 @@
 <sql:query var="country" dataSource="jdbc/lut2">
     SELECT full_name FROM country
 </sql:query>
-<%--Trololol, dette er ein bug --%>
 
 
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
