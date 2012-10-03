@@ -9,7 +9,7 @@
         <welcome-file>index.jsp</welcome-file>
     </welcome-file-list>
     <resource-ref>
-        <description>DB for LUT 2.0</description>
+        <description>DB for LUT 3.0</description>
         <res-ref-name>jdbc/lut2</res-ref-name>
         <res-type>javax.sql.DataSource</res-type>
         <res-auth>Container</res-auth>

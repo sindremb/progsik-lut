@@ -12,14 +12,14 @@
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
         <link rel="stylesheet" type="text/css" href="lutstyle.css">
-        <title>LUT 2.0 - Help Students Conquer the World</title>
+        <title>LUT 3.0 - Help Students Conquer the World</title>
     </head>
     <body>
         <h1>Hi student!</h1>
         <table border="0">
             <thead>
                 <tr>
-                    <th>LUT 2.0 provides information about approved international schools</th>
+                    <th>LUT 3.0 provides information about approved international schools</th>
                 </tr>
             </thead>
             <tbody>
