@@ -57,11 +57,18 @@
 	            emailunique = false;
 	        }
 	        if(unameunique && emailunique) {
-	        	// Create user
-	        	String createquery = "INSERT INTO users VALUES(uname='" +uname+ "',email='" + email + "', firstname='"+ fname
-	        		+ "', lname='" + lname + "', pw='" + pwd +"', type=2, active=0);";
-		        PreparedStatement createstatement = connection.prepareStatement(emailquery);
-		        createstatement.executeQuery();
+	        	// Prepeare insert user statement
+			    String sql = "INSERT INTO users (uname,email,firstname,lastname,type,active) VALUES(?,?,?,?,?,?)";
+			    PreparedStatement createUser = connection.prepareStatement(sql);
+		        // Set the value
+		        createUser.setString(1, uname);
+		        createUser.setString(2, email);
+		        createUser.setString(3, fname);
+		        createUser.setString(4, lname);
+		        createUser.setInt(5, 2);
+		        createUser.setInt(6, 0);
+		        // Insert the row
+		        createUser.executeUpdate();
 		        // Send email
 	       		String result;
 		   		// Recipient's email ID needs to be mentioned.
@@ -118,6 +125,7 @@
     </head>
     <body>
         <h1>Register new user</h1>
+        Already have a user? <a href="login.jsp">Log in here</a><br /><br />
         <form action='register.jsp' method='post'>
 	        <table border="0">
 	            <thead>
