@@ -8,6 +8,7 @@
 <%@page import="java.io.*,java.util.*,javax.mail.*"%>
 <%@page import="javax.mail.internet.*,javax.activation.*"%>
 <%@page import="javax.servlet.http.*,javax.servlet.*" %>
+<%@page import="java.util.UUID" %>
 
 <%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
 <%@taglib prefix="sql" uri="http://java.sun.com/jsp/jstl/sql"%>
@@ -69,6 +70,15 @@
 		        createUser.setInt(6, 0);
 		        // Insert the row
 		        createUser.executeUpdate();
+		        // Create activate key for user
+				String key = UUID.randomUUID().toString();
+				String sql2 = "INSERT INTO activate (uname,key) VALUES(?,?)";
+			    PreparedStatement activate = connection.prepareStatement(sql2);
+		        // Set the value
+		        activate.setString(1, uname);
+		        activate.setString(2, key);
+		        // Insert the row
+		        activate.executeUpdate();
 		        // Send email
 				String host = "smtp.gmail.com";
 			    String from = "bestlut3";
