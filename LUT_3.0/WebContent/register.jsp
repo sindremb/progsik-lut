@@ -9,7 +9,6 @@
 <%@page import="javax.mail.internet.*,javax.activation.*"%>
 <%@page import="javax.servlet.http.*,javax.servlet.*" %>
 <%@page import="java.util.UUID" %>
-
 <%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
 <%@taglib prefix="sql" uri="http://java.sun.com/jsp/jstl/sql"%>
 
@@ -108,8 +107,10 @@
 			    for( int i=0; i < toAddress.length; i++) { // changed from a while loop
 			        message.addRecipient(Message.RecipientType.TO, toAddress[i]);
 			    }
-			    message.setSubject("Success!");
-			    message.setText("You have received this email because you have registered a user with this email at the best LUT3.0");
+			    message.setSubject("Welcome to LUT3.0!");
+			    String appRoot = request.getScheme() + "://" + request.getServerName() + ":" + request.getServerPort() + request.getContextPath();
+			    message.setText("Hello, "+uname+"\n\nYou have received this email because you have registered a user with this email at the best LUT3.0"+
+			    "\n\nTo activate your account you can visit this link\n\n"+appRoot+"/activate.jsp?uname="+uname+"&key="+key);
 			    Transport transport = s.getTransport("smtp");
 			    transport.connect(host, from, pass);
 			    transport.sendMessage(message, message.getAllRecipients());

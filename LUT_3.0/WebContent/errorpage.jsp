@@ -13,8 +13,8 @@
         <link rel="stylesheet" type="text/css" href="lutstyle.css">
         <title>LUT 3.0 - Help Students Conquer the World</title>
     </head>
-    <body>
-        <h1>Ooops/h1>
+    <body class="errormessage">
+        <h1>Ooops</h1>
 	        <table border="0">
 	            <thead>
 	                <tr>
