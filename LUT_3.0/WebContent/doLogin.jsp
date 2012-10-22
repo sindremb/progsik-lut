@@ -30,11 +30,16 @@
 	rs=statement.executeQuery(query);
 		if(rs.next())
 			{
-					
-				session.setAttribute("scid",uname);
-				connection.close();
-				response.sendRedirect("index.jsp");
-				
+				String type = rs.getString("type");
+				if ("0".equals(type)) {
+					session.setAttribute("uname",uname);
+					connection.close();
+					response.sendRedirect("lutadmin.jsp");
+				} else if ("2".equals(type)) {
+					session.setAttribute("uname",uname);
+					connection.close();
+					response.sendRedirect("index.jsp");
+				}
 			}
 		else
 			{
