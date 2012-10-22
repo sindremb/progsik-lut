@@ -10,24 +10,18 @@
     </head>
     <body>
         <h1>Welcome to the LUT administration pages!</h1>
-        <table border="0">
-            <thead>
-                <tr>
-                    <th>Log on here to perform administrative tasks</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td><form method="post" action="login.jsp">
-
-                            <p>
-                                Username:</font><input type="text" name="username" size="20"></p>
-                            <p>
-                                Password:</font><input type="password" name="password" size="20"></p>
-                            <p><input type="submit" value="submit" name="login"></p>
-                        </form></td>
-                </tr>
-            </tbody>
+        <table>
+        	<thead>
+        		<tr>
+        			<td>Here you can do a lot fun things!</td>
+        		</tr>
+        	</thead>
+        	<tbody>
+        		<tr>
+        			<td><a href = "add_country.jsp">Add a country</a></td>
+        		</tr>
+					<td><a href = "add_school.jsp">Add a school</a></td>
+        	</tbody>
         </table>
     </body>
 </html>
