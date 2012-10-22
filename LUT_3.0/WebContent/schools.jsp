@@ -1,12 +1,31 @@
-<%@taglib prefix="sql" uri="http://java.sun.com/jsp/jstl/sql"%>
-<%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
+<%@page import="java.sql.ResultSet"%>
+<%@page import="java.sql.PreparedStatement"%>
+<%@page import="java.sql.SQLException"%>
+<%@page import="java.sql.Connection"%>
+<%@page import="javax.sql.DataSource"%>
+<%@page import="javax.naming.InitialContext"%>
+
+<%
+String country_full = request.getParameter("country");
+
+InitialContext ctx = new InitialContext();
+DataSource ds = (DataSource) ctx.lookup("jdbc/lut2");
+Connection connection = ds.getConnection();
+
+if (connection == null)
+{
+	throw new SQLException("Error establishing connection!");
+}
 
 
-<sql:query var="school" dataSource="jdbc/lut2">
-    SELECT * FROM country, school
-    WHERE school.country = country.short_name
-    AND country.full_name = ? <sql:param value="${param.country}"/>
-</sql:query>
+String query = "select * from school, country where school.country = country.short_name AND country.full_name = ?"; 
+PreparedStatement statement = connection.prepareStatement(query);
+statement.setString(1, country_full);
+ResultSet rs = statement.executeQuery();
+connection.close();
+
+%>
+
 
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <!DOCTYPE html>
@@ -14,44 +33,45 @@
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
         <link rel="stylesheet" type="text/css" href="lutstyle.css">
-        <title>LUT 2.0 - ${param.country}</title>
+        <title>LUT 3.0 - <%out.print(country_full); %></title>
     </head>
     <body>
-        <h1>Approved schools in ${param.country}</h1>
+        <h1>Approved schools in <%out.print(country_full); %></h1>
         <br><br>
-        <c:forEach var="schoolDetails" items="${school.rowsByIndex}">
+        <table border="0">
+        <% 
 
-            <table border="0">
-                <thead>
-                    <tr>
-                        <th colspan="2">${schoolDetails[3]}</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td><strong>Nickname: </strong></td>
-                        <td><span style="font-size:smaller; font-style:italic;">${schoolDetails[4]}</span></td>
-                    </tr>
-                    <tr>
-                        <td><strong>Address: </strong></td>
-                        <td>${schoolDetails[5]}
-                            <br>
-                            <span style="font-size:smaller; font-style:italic;">
-                                zip: ${schoolDetails[6]}</span>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            <form action="school_reviews.jsp">
-                                <input type="hidden" name="school_id" value="${schoolDetails[2]}" />
-                                <input type="hidden" name="school_fullname" value="${schoolDetails[3]}" />
-                                <input type="hidden" name="school_shortname" value="${schoolDetails[4]}" />
-                                <input type="submit" value="Read reviews" />
-                            </form>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-        </c:forEach>
+        String fullname = "";
+        String shortname = "";
+        String zip = "";
+        String place = "";
+        String country = "";
+        String school_id = "";
+        	
+        while(rs.next()){
+        	school_id = rs.getString("school_id");
+			fullname = rs.getString("full_name");
+			shortname = rs.getString("short_name");
+			place = rs.getString("place");
+			zip = rs.getString("zip");
+			country = rs.getString("country");
+			
+        	out.print("<thead><tr>");
+        	out.print("<th colspan = '2'>" + fullname + "</th>");
+        	out.print("</tr></thead>");
+        	out.print("<tbody><tr><td><strong>Nickname: </strong></td>");
+        	out.print("<td><span style = 'font-size:smaller; font-style:italic;'>" + shortname + "</span></td>" );
+        	out.print("</tr><tr><td><strong>Address: </strong></td>");
+        	out.print("<td>" + place +"<br>");
+        	out.print("<span style='font-size:smaller; font-style:italic;'>zip: "+ zip + "</span></td></tr>" );
+        	out.print("<tr><td><form action='school_reviews.jsp'>");
+        	out.print("<input type='hidden' name='school_id' value='" + school_id + "' />");
+        	out.print("<input type='hidden' name='school_fullname' value='" + fullname + "' />");
+        	out.print("<input type='hidden' name='school_shortname' value='" + shortname + "' />");
+        	out.print("<input type='submit' name='Read reviews' />");
+        	out.print("</form></td></tr></tbody></table>");
+        }
+        %>
+
     </body>
 </html>

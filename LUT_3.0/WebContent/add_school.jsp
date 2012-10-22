@@ -1,3 +1,9 @@
+<% 
+String type = (String)session.getAttribute("type");
+if (type == null || !(type).equals("1")){
+	response.sendRedirect("index.jsp");
+}
+%>
 <%@page import="java.sql.ResultSet"%>
 <%@page import="java.sql.PreparedStatement"%>
 <%@page import="java.sql.SQLException"%>
@@ -100,13 +106,24 @@ if (!(fullname.equals(""))&& !(shortname.equals("")) && !(place.equals("")) && !
 	    }
 	    
 	    
-	    query ="select * from school where full_name = '" + fullname + "' AND short_name = '" + shortname +"' AND place = '" + place + "' AND zip = '" + zip+ "' AND country = '" + country + "'";
+	    query ="select * from school where full_name = ? AND short_name = ? AND place = ? AND zip = ? AND country = ?";
 	    statement = connection.prepareStatement(query);
+	    statement.setString(1, fullname);
+	    statement.setString(2, shortname);
+	    statement.setString(3, place);
+	    statement.setString(4, zip);
+	    statement.setString(5, country);
+	    
 	    rs = statement.executeQuery();
 	    
 	   	if(!rs.next()){
-	   		query = "insert into school(full_name, short_name, place, zip, country) values ('" + fullname + "', '" + shortname  + "', '" + place + "', '" + zip + "', '" + country +"' )";
+	   		query = "insert into school(full_name, short_name, place, zip, country) values (?, ?, ?, ?, ?)";
 	    	statement = connection.prepareStatement(query);
+	    	statement.setString(1, fullname);
+		    statement.setString(2, shortname);
+		    statement.setString(3, place);
+		    statement.setString(4, zip);
+		    statement.setString(5, country);
 	    	statement.executeUpdate();
 	    	
 	    	out.println("The following school was added");

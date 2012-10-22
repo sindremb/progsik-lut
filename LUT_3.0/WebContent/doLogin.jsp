@@ -21,19 +21,18 @@
 
 	uname=request.getParameter("uname");
 	pw=request.getParameter("pw");
-	String query = "SELECT * FROM users WHERE uname='"+uname+"' AND pw='"+pw+"' ";
+	String query = "SELECT * FROM users WHERE uname = ? AND pw = ?";
 	PreparedStatement statement = connection.prepareStatement(query);
+	statement.setString(1, uname);
+	statement.setString(2,pw);
     
-	ResultSet rs;
-
-	//System.out.println("uname="+uname+" pw="+pw);
-	rs=statement.executeQuery(query);
+	ResultSet rs = statement.executeQuery();
 		if(rs.next())
 			{
 				String type = rs.getString("type");
 				if ("1".equals(type)) {
 					session.setAttribute("uname",uname);
-					session.setAttribute("type", "1")
+					session.setAttribute("type", "1");
 					connection.close();
 					response.sendRedirect("lutadmin.jsp");
 				} else if ("2".equals(type)) {

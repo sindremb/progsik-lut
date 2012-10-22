@@ -1,3 +1,11 @@
+<% 
+String type = (String)session.getAttribute("type");
+if (type == null || !(type).equals("1")){
+	response.sendRedirect("index.jsp");
+}
+%>
+
+
 <%@page import="java.sql.ResultSet"%>
 <%@page import="java.sql.PreparedStatement"%>
 <%@page import="java.sql.SQLException"%>
@@ -18,9 +26,6 @@
 <h1>Add a country!</h1>
 
 <body>
- <% String name = "ravi";
-            session.setAttribute("user", name);
-    %>
 
 <form method = post action = "add_country.jsp">
 	<table>
@@ -62,13 +67,17 @@
 	    }
 	    
 	    
-	    String query ="select * from country where full_name = '" + fullname + "' AND short_name = '" + shortname +"'";
+	    String query ="select * from country where full_name = ? AND short_name = ?";
 	    PreparedStatement statement = connection.prepareStatement(query);
+	    statement.setString(1, fullname);
+	    statement.setString(2, shortname);
 	    ResultSet rs = statement.executeQuery();
 	    
 	   	if(!rs.next()){
-	   		query = "insert into country values ('" + shortname + "', '" + fullname +"')";
+	   		query = "insert into country values (?, ?)";
 	    	statement = connection.prepareStatement(query);
+	    	statement.setString(1, shortname);
+	    	statement.setString(2, fullname);
 	    	statement.executeUpdate();
 	    	
 	    	out.println("The following country was added  <br>");
