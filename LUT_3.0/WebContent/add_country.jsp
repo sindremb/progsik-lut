@@ -77,8 +77,8 @@
 		}
 	   	
     }
+	out.print("<a href = 'lutadmin.jsp'>Back to admin page</a>");
 %>
-    
     
 </body>
 </html>
