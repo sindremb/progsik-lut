@@ -1,6 +1,18 @@
 
 
+<% 
+
+String type = (String)session.getAttribute("type");
+if (type == null || !(type).equals("1")){
+	response.sendRedirect("index.jsp");
+}
+
+
+
+
+%>
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
+
 <!DOCTYPE html>
 <html>
     <head>

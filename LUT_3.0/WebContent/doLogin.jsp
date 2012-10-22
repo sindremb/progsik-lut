@@ -31,12 +31,14 @@
 		if(rs.next())
 			{
 				String type = rs.getString("type");
-				if ("0".equals(type)) {
+				if ("1".equals(type)) {
 					session.setAttribute("uname",uname);
+					session.setAttribute("type", "1")
 					connection.close();
 					response.sendRedirect("lutadmin.jsp");
 				} else if ("2".equals(type)) {
 					session.setAttribute("uname",uname);
+					session.setAttribute("type", "2");
 					connection.close();
 					response.sendRedirect("index.jsp");
 				}

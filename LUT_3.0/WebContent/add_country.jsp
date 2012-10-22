@@ -75,6 +75,7 @@
 	    	out.println("Full name is <br> " + fullname);
 	    	out.println("Short name is <br>" + shortname);
 		}
+	   	connection.close();
 	   	
     }
 	out.print("<a href = 'lutadmin.jsp'>Back to admin page</a>");

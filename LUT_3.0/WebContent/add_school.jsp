@@ -63,6 +63,7 @@
 			   		full_name = rs.getString("full_name");
 			    	out.print("<option value = '" + short_name +"' >" + full_name + "</option>" );
 				} 
+			   	connection.close();
 				%>
 				</select></td>
 			<tr>
@@ -79,7 +80,6 @@
 	String place = "";
 	String zip  = "";
 	String country = "";
-	
 	if (request.getParameter("fullname") != null && request.getParameter("shortname") != null && request.getParameter("place") != null && request.getParameter("zip") != null && request.getParameter("country") != null){
 		fullname = request.getParameter("fullname");
 		shortname = request.getParameter("shortname");
@@ -116,6 +116,8 @@ if (!(fullname.equals(""))&& !(shortname.equals("")) && !(place.equals("")) && !
 	    	out.println("<br>Zip is " + zip);
 	    	out.println("<br>Country is " + country);
 		}
+	   	
+	   	connection.close();
 	   	
     }
 	out.print("<a href = 'lutadmin.jsp'>Back to admin page</a>");	
