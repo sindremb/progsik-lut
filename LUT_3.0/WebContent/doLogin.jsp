@@ -38,13 +38,14 @@ public static String sanitize(String s) {
 	uname = sanitize(uname);
 	pw = sanitize(pw);
 	
-	String query = "SELECT * FROM users WHERE uname='"+uname+"' AND pw='"+pw+"' ";
+	String query = "SELECT * FROM users WHERE uname = ? AND pw = ?";
 	PreparedStatement statement = connection.prepareStatement(query);
-    
+   	statement.setString(1, uname);
+    statement.setString(2, pw);
 	ResultSet rs;
 
 	//System.out.println("uname="+uname+" pw="+pw);
-	rs=statement.executeQuery(query);
+	rs=statement.executeQuery();
 		if(rs.next())
 			{
 				String type = rs.getString("type");
