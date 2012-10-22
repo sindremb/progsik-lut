@@ -8,6 +8,17 @@
 <%@page import="javax.sql.DataSource"%>
 <%@page import="javax.naming.InitialContext"%>
 
+<%! 
+public static String sanitize(String s) {
+  
+     s.replaceAll("(?i)<script.*?>.*?</script.*?>", "");   // case 1 <script> are removed
+     s.replaceAll("(?i)<.*?javascript:.*?>.*?</.*?>", ""); // case 2 javascript: call are removed
+     s.replaceAll("(?i)<.*?\\s+on.*?>.*?</.*?>", "");     // case 3 remove on* attributes like onLoad or onClick
+     return s;
+}
+%>
+
+
 <% String uname="",pw=""; %>
 <% 
 	InitialContext ctx = new InitialContext();
@@ -21,6 +32,10 @@
 
 	uname=request.getParameter("uname");
 	pw=request.getParameter("pw");
+	
+	sanitize(uname);
+	sanitize(pw);
+	
 	String query = "SELECT * FROM users WHERE uname='"+uname+"' AND pw='"+pw+"' ";
 	PreparedStatement statement = connection.prepareStatement(query);
     
