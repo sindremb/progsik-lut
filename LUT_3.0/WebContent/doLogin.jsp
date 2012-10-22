@@ -11,9 +11,11 @@
 <%! 
 public static String sanitize(String s) {
   
-     s.replaceAll("(?i)<script.*?>.*?</script.*?>", "");   // case 1 <script> are removed
-     s.replaceAll("(?i)<.*?javascript:.*?>.*?</.*?>", ""); // case 2 javascript: call are removed
-     s.replaceAll("(?i)<.*?\\s+on.*?>.*?</.*?>", "");     // case 3 remove on* attributes like onLoad or onClick
+     s = s.replaceAll("(?i)<script.*?>.*?</script.*?>","");   // case 1 <script> are removed
+     s = s.replaceAll("(?i)<.*?javascript:.*?>.*?</.*?>",""); // case 2 javascript: call are removed
+     s = s.replaceAll("(?i)<.*?\\s+on.*?>.*?</.*?>","");     // case 3 remove on* attributes like onLoad or onClick
+     s = s.replaceAll("[<>{}\\[\\];\\&]",""); // case 4 remove malicous chars. May be overkill...
+     // s = s.replaceAll("j", ""); test
      return s;
 }
 %>
@@ -33,8 +35,8 @@ public static String sanitize(String s) {
 	uname=request.getParameter("uname");
 	pw=request.getParameter("pw");
 	
-	sanitize(uname);
-	sanitize(pw);
+	uname = sanitize(uname);
+	pw = sanitize(pw);
 	
 	String query = "SELECT * FROM users WHERE uname='"+uname+"' AND pw='"+pw+"' ";
 	PreparedStatement statement = connection.prepareStatement(query);
