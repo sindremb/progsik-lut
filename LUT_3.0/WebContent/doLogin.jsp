@@ -48,7 +48,7 @@ public static String sanitize(String s) {
 				String type = rs.getString("type");
 				if ("1".equals(type)) {
 					session.setAttribute("uname",uname);
-					session.setAttribute("type", "1")
+					session.setAttribute("type", "1");
 					connection.close();
 					response.sendRedirect("lutadmin.jsp");
 				} else if ("2".equals(type)) {
