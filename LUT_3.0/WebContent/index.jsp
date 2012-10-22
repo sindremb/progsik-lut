@@ -5,6 +5,13 @@
     SELECT full_name FROM country
 </sql:query>
 
+<%@ page import="java.sql.*" %>
+<%! String uname=""; %>
+
+<%
+uname=(String)session.getAttribute("uname");
+%> 
+
 
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <!DOCTYPE html>
@@ -12,14 +19,14 @@
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
         <link rel="stylesheet" type="text/css" href="lutstyle.css">
-        <title>LUT 3.0 - Help Students Conquer the World</title>
+        <title>LUT 2.0 - Help Students Conquer the World</title>
     </head>
     <body>
-        <h1>Hi student!</h1>
+        <h1>Welcome: <strong><%= uname %></strong></h1>
         <table border="0">
             <thead>
                 <tr>
-                    <th>LUT 3.0 provides information about approved international schools</th>
+                    <th>LUT 2.0 provides information about approved international schools</th>
                 </tr>
             </thead>
             <tbody>
