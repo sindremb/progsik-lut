@@ -27,8 +27,7 @@
     }
     String sql = "SELECT * FROM activate WHERE uname='"+uname+"';";
     PreparedStatement activate = connection.createStatement(ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE);
-    activate.setString(1, uname);
-    ResultSet rs = activate.executeQuery();
+    ResultSet rs = activate.executeQuery(sql);
     if (!rs.next())
     {
     	pageContext.forward("errorpage.jsp");
