@@ -1,3 +1,20 @@
+<% 
+String type = (String)session.getAttribute("type");
+
+Boolean redirect = true;
+
+if (type == null){
+	redirect = true;
+}else if (type.equals("1") || type.equals("2")){
+	redirect = false;
+}
+
+if (redirect){
+	response.sendRedirect("login.jsp");
+}
+
+%>
+
 <%@page import="java.sql.ResultSet"%>
 <%@page import="java.sql.PreparedStatement"%>
 <%@page import="java.sql.SQLException"%>

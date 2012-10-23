@@ -1,9 +1,44 @@
-<%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
-<%@taglib prefix="sql" uri="http://java.sun.com/jsp/jstl/sql"%>
+<% 
+String type = (String)session.getAttribute("type");
 
-<sql:query var="country" dataSource="jdbc/lut2">
-    SELECT full_name FROM country
-</sql:query>
+Boolean redirect = true;
+
+if (type == null){
+	redirect = true;
+}else if (type.equals("1") || type.equals("2")){
+	redirect = false;
+}
+
+if (redirect){
+	response.sendRedirect("login.jsp");
+}
+
+%>
+
+<%@page import="java.sql.ResultSet"%>
+<%@page import="java.sql.PreparedStatement"%>
+<%@page import="java.sql.SQLException"%>
+<%@page import="java.sql.Connection"%>
+<%@page import="javax.sql.DataSource"%>
+<%@page import="javax.naming.InitialContext"%>
+
+<%
+InitialContext ctx = new InitialContext();
+DataSource ds = (DataSource) ctx.lookup("jdbc/lut2");
+Connection connection = ds.getConnection();
+
+if (connection == null)
+{
+	throw new SQLException("Error establishing connection!");
+}
+
+
+String query = "select full_name from country"; 
+PreparedStatement statement = connection.prepareStatement(query);
+ResultSet rs = statement.executeQuery();
+connection.close();
+
+%>
 
 <%@ page import="java.sql.*" %>
 <%! String uname=""; %>
@@ -19,14 +54,14 @@ uname=(String)session.getAttribute("uname");
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
         <link rel="stylesheet" type="text/css" href="lutstyle.css">
-        <title>LUT 2.0 - Help Students Conquer the World</title>
+        <title>LUT 3.0 - Help Students Conquer the World</title>
     </head>
     <body>
         <h1>Welcome: <strong><%= uname %></strong></h1>
         <table border="0">
             <thead>
                 <tr>
-                    <th>LUT 2.0 provides information about approved international schools</th>
+                    <th>LUT 3.0 provides information about approved international schools</th>
                 </tr>
             </thead>
             <tbody>
@@ -37,11 +72,13 @@ uname=(String)session.getAttribute("uname");
                     <td><form action="schools.jsp">
                             <strong>Select a country:</strong>
                             <select name="country">
-                                <c:forEach var="row" items="${country.rowsByIndex}">
-                                    <c:forEach var="column" items="${row}">
-                                        <option value="<c:out value="${column}"/>"><c:out value="${column}"/></option>
-                                    </c:forEach>
-                                </c:forEach>
+                                <%
+                                String full_name = "";
+                                while (rs.next()){
+                                	full_name = rs.getString("full_name");
+                                	out.print("<option value = '" + full_name + "'>" + full_name + "</option>");
+                                }
+                                %>
                             </select>
                             <input type="submit" value="submit" />
                         </form></td>
