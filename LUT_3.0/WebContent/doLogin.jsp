@@ -7,7 +7,6 @@
 <%@page import="java.sql.Connection"%>
 <%@page import="javax.sql.DataSource"%>
 <%@page import="javax.naming.InitialContext"%>
-<%@page import="java.security.MessageDigest"%>
 
 
 
@@ -28,15 +27,28 @@ public static String sanitize(String s) {
 	
 	int loginattempts = 1;
 	int maxattempts = 10;
-	int timeout = 1000;
+	int timeout = 1000; //= 1 sec, will be doubled after each failed login attempt
 	
 	number=request.getParameter("number");
 
-
+	boolean isRobot = false;
+	
 	String sest=(String)session.getAttribute("key");
+	
+	
+	try {
 	int key=Integer.parseInt(sest);
 	int user=Integer.parseInt(request.getParameter("number"));
+		if (key != user) {
+			isRobot = true;
+		}
+	} catch (NumberFormatException e) {
+		isRobot = true;
+	}
+
+		
 	
+		
 		/*
 		if(key==user)			
 				{
@@ -67,28 +79,15 @@ public static String sanitize(String s) {
 	uname = sanitize(uname);
 	pw = sanitize(pw);
 	
-	String query = "SELECT * FROM users WHERE uname = ?";
+	String query = "SELECT * FROM users WHERE uname = ? AND pw = ?";
 	PreparedStatement statement = connection.prepareStatement(query);
    	statement.setString(1, uname);
+    statement.setString(2, pw);
 	ResultSet rs;
-	rs=statement.executeQuery();
-
-	String salt = "";
-	String pwdbhash = "";
-	
-	if(rs.next()){
-		salt = rs.getString("salt");
-		pwdbhash = rs.getString("pw");
-	}
-	
-	 //hashing
-    MessageDigest digest = MessageDigest.getInstance("SHA-256");
-	digest.reset();
-	digest.update(salt.getBytes("UTF-8"));
-	String pwhash = new String(digest.digest(pw.getBytes("UTF-8")), "UTF-8");
 
 	//System.out.println("uname="+uname+" pw="+pw);
-		if(pwdbhash.equals(pwhash) && key==user)
+	rs=statement.executeQuery();
+		if(rs.next() && !isRobot)
 			{
 				String type = rs.getString("type");
 				if ("1".equals(type)) {
@@ -103,7 +102,7 @@ public static String sanitize(String s) {
 					response.sendRedirect("index.jsp");
 				}
 			}
-		else if (key!=user) {
+		else if (isRobot) {
 			loginattempts++;
 			timeout = timeout*2;
 			if (loginattempts < maxattempts) {
@@ -224,7 +223,7 @@ public static String sanitize(String s) {
 						}  
 						else  {  
 							document.forma.clock.value = "Time over";
-							window.location.href = "http://www.sometimesredsometimesblue.com/";
+							window.location.href = "http://www.sometimesredsometimesblue.com/"; 
 							///disable submit-button etc  
 						}  
 					}  
@@ -249,7 +248,6 @@ public static String sanitize(String s) {
 				
 				<%
 			}
-	
 	}
 	%>
 	</body>
