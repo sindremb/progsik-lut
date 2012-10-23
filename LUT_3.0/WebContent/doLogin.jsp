@@ -21,8 +21,28 @@ public static String sanitize(String s) {
 %>
 
 
-<% String uname="",pw=""; %>
+<% String uname="",pw=""; String number="";%>
 <% 
+	
+	int loginattempts = 1;
+	int maxattempts = 5;
+	number=request.getParameter("number");
+
+
+	String sest=(String)session.getAttribute("key");
+	int key=Integer.parseInt(sest);
+	int user=Integer.parseInt(request.getParameter("number"));
+	
+		/*
+		if(key==user)			
+				{
+				out.print("Verification success");
+				}
+		else	{
+				out.print("You have entered wrong verification code!! <br> Please go back and enter proper value.");	
+	*/
+
+
 	InitialContext ctx = new InitialContext();
 	DataSource ds = (DataSource) ctx.lookup("jdbc/lut2");
 	Connection connection = ds.getConnection();
@@ -35,6 +55,11 @@ public static String sanitize(String s) {
 	uname=request.getParameter("uname");
 	pw=request.getParameter("pw");
 	
+	number=request.getParameter("number");
+	
+
+	
+	
 	uname = sanitize(uname);
 	pw = sanitize(pw);
 	
@@ -46,7 +71,7 @@ public static String sanitize(String s) {
 
 	//System.out.println("uname="+uname+" pw="+pw);
 	rs=statement.executeQuery();
-		if(rs.next())
+		if(rs.next() && key==user)
 			{
 				String type = rs.getString("type");
 				if ("1".equals(type)) {
@@ -61,21 +86,50 @@ public static String sanitize(String s) {
 					response.sendRedirect("index.jsp");
 				}
 			}
-		else
+		else if (key!=user) {
+			loginattempts++;
+			if (loginattempts < maxattempts) {
+			%>
+			<html>
+				<head>
+					<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+			        <link rel="stylesheet" type="text/css" href="lutstyle.css">
+			     	<title>Authentication failed</title>
+				</head>
+				
+				<body>	
+					<h1>Invalid verification code</h1>
+					<h3>Please try again</h3>
+					<jsp:include page="login.jsp"/>
+				<% 
+			}
+			else {
+				response.sendRedirect("http://www.vg.no");
+			}
+		}
+		else 
 			{
-%>
-<html>
-	<head>
-		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-        <link rel="stylesheet" type="text/css" href="lutstyle.css">
-     	<title>Authentication failed</title>
-	</head>
+			loginattempts++;
+			if (loginattempts < maxattempts) {
+			%>
+				<html>
+				<head>
+					<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        			<link rel="stylesheet" type="text/css" href="lutstyle.css">
+     				<title>Authentication failed</title>
+				</head>
 	
-	<body>	
-		<h1>Invalid username or password</h1>
-		<h3>Please try again</h3>
-		<jsp:include page="login.jsp"/>
-	<% 
+				<body>	
+					<h1>Invalid username or password</h1>
+					<h3>Please try again</h3>
+					<jsp:include page="login.jsp"/>
+			<% 
+			}
+			else {
+			response.sendRedirect("http://www.vg.no");
+			} 
+		
+	
 	}
 	%>
 	</body>

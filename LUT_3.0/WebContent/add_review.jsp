@@ -1,13 +1,50 @@
+<% 
+String type = (String)session.getAttribute("type");
 
-<%@taglib prefix="sql" uri="http://java.sun.com/jsp/jstl/sql"%>
-<%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
+Boolean redirect = true;
 
-<sql:transaction dataSource="jdbc/lut2">
-    <sql:update var="count">
-        INSERT INTO user_reviews VALUES ('${param.school_id}', '${param.name}', '${param.review}');
-    </sql:update>
-</sql:transaction>
+if (type == null){
+	redirect = true;
+}else if (type.equals("1") || type.equals("2")){
+	redirect = false;
+}
 
+if (redirect){
+	response.sendRedirect("login.jsp");
+}
+
+%><%@page import="java.sql.ResultSet"%>
+<%@page import="java.sql.PreparedStatement"%>
+<%@page import="java.sql.SQLException"%>
+<%@page import="java.sql.Connection"%>
+<%@page import="javax.sql.DataSource"%>
+<%@page import="javax.naming.InitialContext"%>
+
+<% 
+
+String school_id = request.getParameter("school_id");
+String review = request.getParameter("review");
+String name = request.getParameter("name");
+
+InitialContext ctx = new InitialContext();
+DataSource ds = (DataSource) ctx.lookup("jdbc/lut2");
+Connection connection = ds.getConnection();
+
+if (connection == null)
+{
+	throw new SQLException("Error establishing connection!");
+}
+
+String query = "INSERT INTO user_reviews VALUES (?, ?, ?)";
+PreparedStatement statement = connection.prepareStatement(query);
+statement.setString(1, school_id);
+statement.setString(2, name);
+statement.setString(3, review);
+statement.executeUpdate();
+connection.close();
+
+%>
+		
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <!DOCTYPE html>
 <html>
