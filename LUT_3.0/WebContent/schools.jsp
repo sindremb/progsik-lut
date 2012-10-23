@@ -33,14 +33,35 @@ if (connection == null)
 {
 	throw new SQLException("Error establishing connection!");
 }
-
-
-String query = "select * from school, country where school.country = country.short_name AND country.full_name = ?"; 
+String query = "Select * from country where full_name = ?";
 PreparedStatement statement = connection.prepareStatement(query);
 statement.setString(1, country_full);
-ResultSet rs = statement.executeQuery();
-connection.close();
+ResultSet rs = null;
 
+try{
+	rs = statement.executeQuery();
+	if (!rs.next()){
+		response.sendRedirect("index.jsp");
+	}
+}catch(Exception e){
+	response.sendRedirect("errorpage.jsp");
+}
+
+
+
+query = "select * from school, country where school.country = country.short_name AND country.full_name = ?"; 
+statement = connection.prepareStatement(query);
+statement.setString(1, country_full);
+try{
+	rs = statement.executeQuery();
+	}
+catch(Exception e){
+	connection.close();
+	response.sendRedirect("errorpage.jsp");
+	
+}
+
+connection.close();
 %>
 
 

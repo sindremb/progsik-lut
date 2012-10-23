@@ -37,11 +37,31 @@ if (connection == null)
 	throw new SQLException("Error establishing connection!");
 }
 
-
-String query = "select * from user_reviews where school_id = ?";
+String query = "select * from school where school_id = ? AND full_name = ? AND short_name = ?";
 PreparedStatement statement = connection.prepareStatement(query);
 statement.setString(1, school_id);
-ResultSet rs = statement.executeQuery();
+statement.setString(2, fullname);
+statement.setString(3, shortname);
+ResultSet rs = null;
+try{
+	rs = statement.executeQuery();
+	if (!rs.next()){
+		response.sendRedirect("index.jsp");
+	}
+}catch (Exception e){
+	response.sendRedirect("errorpage.jsp");
+}
+
+
+query = "select * from user_reviews where school_id = ?";
+statement = connection.prepareStatement(query);
+statement.setString(1, school_id);
+
+try{
+	rs = statement.executeQuery();
+}catch (Exception e){
+	response.sendRedirect("errorpage.jsp");
+}
 connection.close();
 	
 %>
