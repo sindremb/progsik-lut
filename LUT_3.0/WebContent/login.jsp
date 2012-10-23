@@ -38,8 +38,8 @@
 	                	<tr> <td align="center" colspan="2"><img src="mcap.jsp"><br><br>
 						<input type="button" value="Refresh Image" onClick="window.location.href=window.location.href"></td></tr>
 	                	<td align="center"> Please enter the answer for above calculation.</td><tr>
-						<td align="center"><input name="number" type="text"></td><tr>
-						<td align="center">
+						<td align="center"><input name="number" type="text"></td></tr><tr>
+						<td align="center"></td></tr>
 						
 				  	</tbody>
 				</table>
