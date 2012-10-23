@@ -7,6 +7,7 @@
 <%@page import="java.sql.Connection"%>
 <%@page import="javax.sql.DataSource"%>
 <%@page import="javax.naming.InitialContext"%>
+<%@page import="java.security.MessageDigest"%>
 
 
 
@@ -66,15 +67,28 @@ public static String sanitize(String s) {
 	uname = sanitize(uname);
 	pw = sanitize(pw);
 	
-	String query = "SELECT * FROM users WHERE uname = ? AND pw = ?";
+	String query = "SELECT * FROM users WHERE uname = ?";
 	PreparedStatement statement = connection.prepareStatement(query);
    	statement.setString(1, uname);
-    statement.setString(2, pw);
 	ResultSet rs;
+	rs=statement.executeQuery();
+
+	String salt = "";
+	String pwdbhash = "";
+	
+	if(rs.next()){
+		salt = rs.getString("salt");
+		pwdbhash = rs.getString("pw");
+	}
+	
+	 //hashing
+    MessageDigest digest = MessageDigest.getInstance("SHA-256");
+	digest.reset();
+	digest.update(salt.getBytes("UTF-8"));
+	String pwhash = new String(digest.digest(pw.getBytes("UTF-8")), "UTF-8");
 
 	//System.out.println("uname="+uname+" pw="+pw);
-	rs=statement.executeQuery();
-		if(rs.next() && key==user)
+		if(pwdbhash.equals(pwhash) && key==user)
 			{
 				String type = rs.getString("type");
 				if ("1".equals(type)) {

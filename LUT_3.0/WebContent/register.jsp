@@ -9,6 +9,7 @@
 <%@page import="javax.mail.internet.*,javax.activation.*"%>
 <%@page import="javax.servlet.http.*,javax.servlet.*" %>
 <%@page import="java.util.UUID" %>
+<%@page import="java.security.MessageDigest"%>
 <%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
 <%@taglib prefix="sql" uri="http://java.sun.com/jsp/jstl/sql"%>
 
@@ -65,15 +66,25 @@
 		        if(unameunique && emailunique) {
 		        	// Prepeare insert user statement
 				    PreparedStatement createUser = connection.prepareStatement(
-				    		"INSERT INTO users (uname,email,firstname,lastname,type,active,salt) VALUES(?,?,?,?,?,?,?)");
+				    		"INSERT INTO users (uname,email,firstname,lastname,type,active,salt, pw) VALUES(?,?,?,?,?,?,?,?)");
 			        // Set the value
+			        
+			        String salt = UUID.randomUUID().toString();
+			        
+			        //hashing
+			        MessageDigest digest = MessageDigest.getInstance("SHA-256");
+					digest.reset();
+					digest.update(salt.getBytes("UTF-8"));
+					String pwhash = new String(digest.digest(pwd.getBytes("UTF-8")), "UTF-8");
+			        
 			        createUser.setString(1, uname);
 			        createUser.setString(2, email);
 			        createUser.setString(3, fname);
 			        createUser.setString(4, lname);
 			        createUser.setInt(5, 2);
 			        createUser.setInt(6, 0);
-			        createUser.setString(7, UUID.randomUUID().toString());
+			        createUser.setString(7, salt);
+			        createUser.setString(8, pwhash);
 			        // Insert the row
 			        createUser.executeUpdate();
 			        // Create activate key for user
