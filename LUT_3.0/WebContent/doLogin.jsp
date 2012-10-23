@@ -124,8 +124,55 @@ public static String sanitize(String s) {
 			<% 
 			}
 			else {
-				response.sendRedirect("http://www.sometimesredsometimesblue.com/");
+				%>
+				<html>
+				<head>
+					<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+			        <link rel="stylesheet" type="text/css" href="lutstyle.css">
+			     	<title>You must be a robot</title>
+				</head>
 				
+				<body>
+					<h1>You have failed login to many times</h1>
+					<h3>If u fail to answer the question below before the timer runs out you will be redirected to a random page on the web</h3>
+					<script>  
+					<!--  
+					<%  
+					String clock = request.getParameter( "clock" );  
+						if( clock == null ) clock = "10";  
+					%>  
+					var timeout = <%=clock%>;  
+					function timer()  {  
+						if( --timeout > 0 )  {  
+							document.forma.clock.value = timeout;  
+							window.setTimeout( "timer()", 1000 );  
+						}  
+						else  {  
+							document.forma.clock.value = "Time over";
+							window.location.href = "http://www.sometimesredsometimesblue.com/";
+							///disable submit-button etc  
+						}  
+					}  
+					//-->  
+					</script>  
+					<body>  
+					<form action="<%=request.getRequestURL()%>" name="forma">  
+					Seconds remaining: <input type="text" name="clock" value="<%=clock%>" style="border:0px solid white">  
+					</form>  
+					<script>  
+					<!--  
+					timer();  
+					//-->  
+					</script>  
+					Question: There was a green house. Inside the green house there was a white house. Inside the white house there was a red house. Inside the red house there were lots of babies. What is it?<br>  
+					<form method="post" action='check.jsp'>
+					Answer: <input type="text" name="answer">	 
+					<input type="submit" name="ok" value="OK">   
+					</form>
+				
+				</body>
+				
+				<%
 			}
 		}
 		else 
@@ -152,8 +199,56 @@ public static String sanitize(String s) {
 			<% 
 			}
 			else {
-			response.sendRedirect("http://www.sometimesredsometimesblue.com/");
-			} 
+				%>
+				<html>
+				<head>
+					<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+			        <link rel="stylesheet" type="text/css" href="lutstyle.css">
+			     	<title>You must be a robot</title>
+				</head>
+				
+				<body>
+					<h1>You have failed login to many times</h1>
+					<h3>If u fail to answer the question below before the timer runs out you will be redirected to a random page on the web</h3>
+					<script>  
+					<!--  
+					<%  
+					String clock = request.getParameter( "clock" );  
+						if( clock == null ) clock = "10";  
+					%>  
+					var timeout = <%=clock%>;  
+					function timer()  {  
+						if( --timeout > 0 )  {  
+							document.forma.clock.value = timeout;  
+							window.setTimeout( "timer()", 1000 );  
+						}  
+						else  {  
+							document.forma.clock.value = "Time over";
+							window.location.href = "http://www.sometimesredsometimesblue.com/";
+							///disable submit-button etc  
+						}  
+					}  
+					//-->  
+					</script>  
+					<body>  
+					<form action="<%=request.getRequestURL()%>" name="forma">  
+					Seconds remaining: <input type="text" name="clock" value="<%=clock%>" style="border:0px solid white">  
+					</form>  
+					<script>  
+					<!--  
+					timer();  
+					//-->  
+					</script>  
+					Question: There was a green house. Inside the green house there was a white house. Inside the white house there was a red house. Inside the red house there were lots of babies. What is it?<br>  
+					<form method="post" action='check.jsp'>
+					Answer: <input type="text" name="answer">	 
+					<input type="submit" name="ok" value="OK">   
+					</form>
+				
+				</body>
+				
+				<%
+			}
 	
 	}
 	%>
