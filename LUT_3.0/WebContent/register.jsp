@@ -71,7 +71,7 @@
 	        if(unameunique && emailunique) {
 	        	// Prepeare insert user statement
 			    PreparedStatement createUser = connection.prepareStatement(
-			    		"INSERT INTO users (uname,email,firstname,lastname,type,active,salt,pw) VALUES(?,?,?,?,?,?,?)");
+			    		"INSERT INTO users (uname,email,firstname,lastname,type,active,salt,pw) VALUES(?,?,?,?,?,?,?,?)");
 			  	//hashing
 		        MessageDigest digest = MessageDigest.getInstance("SHA-256");
 				digest.reset();

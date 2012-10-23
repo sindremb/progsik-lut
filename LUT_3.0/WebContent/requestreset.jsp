@@ -25,15 +25,15 @@
 	        {
 	            throw new SQLException("Error establishing connection!");
 	        }
-	        String userquery = "SELECT * FROM users WHERE uname='" + uname + "';";
-	        PreparedStatement userstatement = connection.prepareStatement(userquery);
+	        PreparedStatement userstatement = connection.prepareStatement("SELECT * FROM users WHERE uname=?");
+	        userstatement.setString(1,uname);
 	        ResultSet users = userstatement.executeQuery();
 	        if (users.next())
 	        {
 	        	String email = users.getString("email");
 	        	// Prepeare insert pwdreset statement
-			    String sql = "INSERT INTO pwdreset (uname,key,valid) VALUES(?,?,?)";
-			    PreparedStatement resetrequest = connection.prepareStatement(sql);
+			    PreparedStatement resetrequest = connection.prepareStatement(
+			    		"INSERT INTO pwdreset (uname,key,valid) VALUES(?,?,?)");
 		        // Set the value
 		        resetrequest.setString(1, uname);
 		        String key = UUID.randomUUID().toString();
@@ -42,9 +42,9 @@
 		        cal.add(Calendar.MINUTE, 10);
 		        resetrequest.setDate(3,new java.sql.Date(cal.getTime().getTime()));
 		        // Insert the row
-		        resetrequest.executeUpdate();
+		        //resetrequest.executeUpdate();
 		        // Create activate key for user
-				String host = "smtp.gmail.com";
+				/*String host = "smtp.gmail.com";
 			    String from = "bestlut3";
 			    String pass = "nY67txzq";
 			    Properties props = System.getProperties();
@@ -79,10 +79,10 @@
 			    Transport transport = s.getTransport("smtp");
 			    transport.connect(host, from, pass);
 			    transport.sendMessage(message, message.getAllRecipients());
-			    transport.close();
+			    transport.close(); */
 				// Show confirmation page
 	        	pageContext.forward("resetrequestconfirmation.jsp");
-	        }
+	        } else { unameerror=true; }
 		}
 	}
 %>
