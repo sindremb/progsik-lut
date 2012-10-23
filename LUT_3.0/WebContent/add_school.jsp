@@ -1,8 +1,18 @@
 <% 
 String type = (String)session.getAttribute("type");
-if (type == null || !(type).equals("1")){
-	response.sendRedirect("index.jsp");
+
+Boolean redirect = true;
+
+if (type == null){
+	redirect = true;
+}else if (type.equals("1")){
+	redirect = false;
 }
+
+if (redirect){
+	response.sendRedirect("login.jsp");
+}
+
 %>
 <%@page import="java.sql.ResultSet"%>
 <%@page import="java.sql.PreparedStatement"%>
@@ -60,7 +70,13 @@ if (type == null || !(type).equals("1")){
 			    
 			    String query ="select * from country";
 			    PreparedStatement statement = connection.prepareStatement(query);
-			    ResultSet rs = statement.executeQuery();
+			    ResultSet rs = null;
+			    try{
+			    	rs = statement.executeQuery();
+			    }
+			    catch (Exception e){
+			    	response.sendRedirect("lutadmin.jsp");
+			    }
 			    String short_name = "";
 			    String full_name = "";
 			    
@@ -114,7 +130,12 @@ if (!(fullname.equals(""))&& !(shortname.equals("")) && !(place.equals("")) && !
 	    statement.setString(4, zip);
 	    statement.setString(5, country);
 	    
-	    rs = statement.executeQuery();
+	    try{
+		    rs = statement.executeQuery();
+	    }
+	    catch(Exception e){
+	    	response.Redirect("lutadmin.jsp");
+	    }
 	    
 	   	if(!rs.next()){
 	   		query = "insert into school(full_name, short_name, place, zip, country) values (?, ?, ?, ?, ?)";

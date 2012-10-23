@@ -1,8 +1,18 @@
 <% 
 String type = (String)session.getAttribute("type");
-if (type == null || !(type).equals("1")){
-	response.sendRedirect("index.jsp");
+
+Boolean redirect = true;
+
+if (type == null){
+	redirect = true;
+}else if (type.equals("1")){
+	redirect = false;
 }
+
+if (redirect){
+	response.sendRedirect("login.jsp");
+}
+
 %>
 
 
@@ -71,14 +81,24 @@ if (type == null || !(type).equals("1")){
 	    PreparedStatement statement = connection.prepareStatement(query);
 	    statement.setString(1, fullname);
 	    statement.setString(2, shortname);
-	    ResultSet rs = statement.executeQuery();
+	    ResultSet rs = null;
+	    try{
+	    	rs = statement.executeQuery();
+	    }catch(Exception e){
+	    	response.sendRedirect("lutadmin.jsp");
+	    }
 	    
 	   	if(!rs.next()){
 	   		query = "insert into country values (?, ?)";
 	    	statement = connection.prepareStatement(query);
 	    	statement.setString(1, shortname);
 	    	statement.setString(2, fullname);
-	    	statement.executeUpdate();
+	    	try{
+	    		statement.executeUpdate();
+	    	}
+	    	catch(Exception e){
+	    		response.sendRedirect("lutadmin.jsp");
+	    	}
 	    	
 	    	out.println("The following country was added  <br>");
 	    	out.println("Full name is <br> " + fullname);

@@ -40,7 +40,12 @@ PreparedStatement statement = connection.prepareStatement(query);
 statement.setString(1, school_id);
 statement.setString(2, name);
 statement.setString(3, review);
-statement.executeUpdate();
+try {
+	statement.executeUpdate();
+}
+catch(Exception e){
+	response.sendRedirect("errorpage.jsp");
+}
 connection.close();
 
 %>

@@ -47,6 +47,11 @@ connection.close();
 uname=(String)session.getAttribute("uname");
 %> 
 
+<%
+session.setMaxInactiveInterval(900 * 1); //automatic logout after 900 seconds :P
+%>
+
+
 
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <!DOCTYPE html>
@@ -85,6 +90,14 @@ uname=(String)session.getAttribute("uname");
                 </tr>
             </tbody>
         </table>
+         <br>
+        <br>
+        <br>
+        <br>
+        <br>
+        <form action="logout.jsp" method="post">
+        	<input type=submit value = Log_out>
+        </form>
 
     </body>
 </html>
