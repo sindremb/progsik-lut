@@ -54,15 +54,17 @@
 	        {
 	            throw new SQLException("Error establishing connection!");
 	        }
-	        String unamequery = "SELECT * FROM users WHERE uname='" + uname + "';";
-	        PreparedStatement unamestatement = connection.prepareStatement(unamequery);
+	        PreparedStatement unamestatement = connection.prepareStatement(
+	        		"SELECT * FROM users WHERE uname = ?");
+	        unamestatement.setString(1,uname);
 	        ResultSet unamers = unamestatement.executeQuery();
 	        if (unamers.next())
 	        {
 	            unameunique = false;
 	        }
-	        String emailquery = "SELECT * FROM users WHERE email='" + email + "';";
-	        PreparedStatement emailstatement = connection.prepareStatement(emailquery);
+	        PreparedStatement emailstatement = connection.prepareStatement(
+	        		"SELECT * FROM users WHERE email = ?");
+	        emailstatement.setString(1,email);
 	        ResultSet emailrs = emailstatement.executeQuery();
 	        if (emailrs.next())
 	        {
@@ -190,7 +192,7 @@
 	                </tr>
 	            </tbody>
 	        </table>
-	        <br /><br />
+	        <br />
 	        <table border="0">
 	            <thead>
 	                <tr>
@@ -228,7 +230,7 @@
 	                
 	            </tbody>
 	        </table>
-	        <br /><br />
+	        <br />
 	        <table border="0">
 	            <thead>
 	                <tr>

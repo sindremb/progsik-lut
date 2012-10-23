@@ -7,6 +7,7 @@
 <%@page import="java.sql.Connection"%>
 <%@page import="javax.sql.DataSource"%>
 <%@page import="javax.naming.InitialContext"%>
+<%@page import="java.security.MessageDigest"%>
 
 
 
@@ -79,17 +80,93 @@ public static String sanitize(String s) {
 	uname = sanitize(uname);
 	pw = sanitize(pw);
 	
-	String query = "SELECT * FROM users WHERE uname = ? AND pw = ?";
-	PreparedStatement statement = connection.prepareStatement(query);
-   	statement.setString(1, uname);
-    statement.setString(2, pw);
-	ResultSet rs;
-
-	//System.out.println("uname="+uname+" pw="+pw);
-	rs=statement.executeQuery();
-		if(rs.next() && !isRobot)
-			{
-				String type = rs.getString("type");
+	
+	if (isRobot) {
+		loginattempts++;
+		timeout = timeout*2;
+		if (loginattempts < maxattempts) {
+			Thread.sleep(timeout);
+		%>
+		<html>
+			<head>
+				<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+		        <link rel="stylesheet" type="text/css" href="lutstyle.css">
+		     	<title>Authentication failed</title>
+			</head>
+			
+			<body>	
+				<h1>Invalid verification code</h1>
+				<h3>Please try again</h3>
+				<jsp:include page="login.jsp"/> 
+				
+		<% } else {
+			%>
+			<html>
+			<head>
+				<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+		        <link rel="stylesheet" type="text/css" href="lutstyle.css">
+		     	<title>You must be a robot</title>
+			</head>
+			
+			<body>
+				<h1>You have failed login to many times</h1>
+				<h3>If u fail to answer the question below before the timer runs out you will be redirected to a random page on the web</h3>
+				<script>  
+				<!--  
+				<%  
+				String clock = request.getParameter( "clock" );  
+					if( clock == null ) clock = "10";  
+				%>  
+				var timeout = <%=clock%>;  
+				function timer()  {  
+					if( --timeout > 0 )  {  
+						document.forma.clock.value = timeout;  
+						window.setTimeout( "timer()", 1000 );  
+					}  
+					else  {  
+						document.forma.clock.value = "Time over";
+						window.location.href = "http://www.sometimesredsometimesblue.com/";
+						///disable submit-button etc  
+					}  
+				}  
+				//-->  
+				</script>  
+				<body>  
+				<form action="<%=request.getRequestURL()%>" name="forma">  
+				Seconds remaining: <input type="text" name="clock" value="<%=clock%>" style="border:0px solid white">  
+				</form>  
+				<script>  
+				<!--  
+				timer();  
+				//-->  
+				</script>  
+				Question: There was a green house. Inside the green house there was a white house. Inside the white house there was a red house. Inside the red house there were lots of babies. What is it?<br>  
+				<form method="post" action='check.jsp'>
+				Answer: <input type="text" name="answer">	 
+				<input type="submit" name="ok" value="OK">   
+				</form>
+			
+			</body>
+			
+			<%
+		}
+	} else {
+		String query = "SELECT * FROM users WHERE uname = ?";
+		PreparedStatement statement = connection.prepareStatement(query);
+	   	statement.setString(1, uname);
+		ResultSet rs;
+		//System.out.println("uname="+uname+" pw="+pw);
+		rs=statement.executeQuery();
+		if(rs.next() && !isRobot){
+			String storedhash = rs.getString("pw");
+			String salt = rs.getString("salt");
+			String type = rs.getString("type");
+			//hashing
+	        MessageDigest digest = MessageDigest.getInstance("SHA-256");
+			digest.reset();
+			digest.update(salt.getBytes("UTF-8"));
+			String pwhash = new String(digest.digest(pw.getBytes("UTF-8")), "UTF-8");
+			if(storedhash.equals(pwhash)) {
 				if ("1".equals(type)) {
 					session.setAttribute("uname",uname);
 					session.setAttribute("type", "1");
@@ -102,152 +179,79 @@ public static String sanitize(String s) {
 					response.sendRedirect("index.jsp");
 				}
 			}
-		else if (isRobot) {
-			loginattempts++;
-			timeout = timeout*2;
-			if (loginattempts < maxattempts) {
-				Thread.sleep(timeout);
+		}
+		loginattempts++;
+		timeout = timeout*2;
+		if (loginattempts < maxattempts) {
+			Thread.sleep(timeout);
+			
+		%>
+			<html>
+			<head>
+				<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+       			<link rel="stylesheet" type="text/css" href="lutstyle.css">
+    				<title>Authentication failed</title>
+			</head>
+
+			<body>	
+				<h1>Invalid username or password</h1>
+				<h3>Please try again</h3>
+				<jsp:include page="login.jsp"/>
+				
+  					 
+		<% 
+		}
+		else {
 			%>
 			<html>
-				<head>
-					<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-			        <link rel="stylesheet" type="text/css" href="lutstyle.css">
-			     	<title>Authentication failed</title>
-				</head>
-				
-				<body>	
-					<h1>Invalid verification code</h1>
-					<h3>Please try again</h3>
-					<jsp:include page="login.jsp"/> 
-					
-			<% 
-			}
-			else {
-				%>
-				<html>
-				<head>
-					<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-			        <link rel="stylesheet" type="text/css" href="lutstyle.css">
-			     	<title>You must be a robot</title>
-				</head>
-				
-				<body>
-					<h1>You have failed login to many times</h1>
-					<h3>If u fail to answer the question below before the timer runs out you will be redirected to a random page on the web</h3>
-					<script>  
-					<!--  
-					<%  
-					String clock = request.getParameter( "clock" );  
-						if( clock == null ) clock = "10";  
-					%>  
-					var timeout = <%=clock%>;  
-					function timer()  {  
-						if( --timeout > 0 )  {  
-							document.forma.clock.value = timeout;  
-							window.setTimeout( "timer()", 1000 );  
-						}  
-						else  {  
-							document.forma.clock.value = "Time over";
-							window.location.href = "http://www.sometimesredsometimesblue.com/";
-							///disable submit-button etc  
-						}  
+			<head>
+				<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+		        <link rel="stylesheet" type="text/css" href="lutstyle.css">
+		     	<title>You must be a robot</title>
+			</head>
+			
+			<body>
+				<h1>You have failed login to many times</h1>
+				<h3>If u fail to answer the question below before the timer runs out you will be redirected to a random page on the web</h3>
+				<script>  
+				<!--  
+				<%  
+				String clock = request.getParameter( "clock" );  
+					if( clock == null ) clock = "10";  
+				%>  
+				var timeout = <%=clock%>;  
+				function timer()  {  
+					if( --timeout > 0 )  {  
+						document.forma.clock.value = timeout;  
+						window.setTimeout( "timer()", 1000 );  
 					}  
-					//-->  
-					</script>  
-					<body>  
-					<form action="<%=request.getRequestURL()%>" name="forma">  
-					Seconds remaining: <input type="text" name="clock" value="<%=clock%>" style="border:0px solid white">  
-					</form>  
-					<script>  
-					<!--  
-					timer();  
-					//-->  
-					</script>  
-					Question: There was a green house. Inside the green house there was a white house. Inside the white house there was a red house. Inside the red house there were lots of babies. What is it?<br>  
-					<form method="post" action='check.jsp'>
-					Answer: <input type="text" name="answer">	 
-					<input type="submit" name="ok" value="OK">   
-					</form>
-				
-				</body>
-				
-				<%
-			}
+					else  {  
+						document.forma.clock.value = "Time over";
+						window.location.href = "http://www.sometimesredsometimesblue.com/"; 
+						///disable submit-button etc  
+					}  
+				}  
+				//-->  
+				</script>  
+				<body>  
+				<form action="<%=request.getRequestURL()%>" name="forma">  
+				Seconds remaining: <input type="text" name="clock" value="<%=clock%>" style="border:0px solid white">  
+				</form>  
+				<script>  
+				<!--  
+				timer();  
+				//-->  
+				</script>  
+				Question: There was a green house. Inside the green house there was a white house. Inside the white house there was a red house. Inside the red house there were lots of babies. What is it?<br>  
+				<form method="post" action='check.jsp'>
+				Answer: <input type="text" name="answer">	 
+				<input type="submit" name="ok" value="OK">   
+				</form>
+			
+			</body>
+			
+			<%
 		}
-		else 
-			{
-			loginattempts++;
-			timeout = timeout*2;
-			if (loginattempts < maxattempts) {
-				Thread.sleep(timeout);
-				
-			%>
-				<html>
-				<head>
-					<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-        			<link rel="stylesheet" type="text/css" href="lutstyle.css">
-     				<title>Authentication failed</title>
-				</head>
-	
-				<body>	
-					<h1>Invalid username or password</h1>
-					<h3>Please try again</h3>
-					<jsp:include page="login.jsp"/>
-					
-   					 
-			<% 
-			}
-			else {
-				%>
-				<html>
-				<head>
-					<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-			        <link rel="stylesheet" type="text/css" href="lutstyle.css">
-			     	<title>You must be a robot</title>
-				</head>
-				
-				<body>
-					<h1>You have failed login to many times</h1>
-					<h3>If u fail to answer the question below before the timer runs out you will be redirected to a random page on the web</h3>
-					<script>  
-					<!--  
-					<%  
-					String clock = request.getParameter( "clock" );  
-						if( clock == null ) clock = "10";  
-					%>  
-					var timeout = <%=clock%>;  
-					function timer()  {  
-						if( --timeout > 0 )  {  
-							document.forma.clock.value = timeout;  
-							window.setTimeout( "timer()", 1000 );  
-						}  
-						else  {  
-							document.forma.clock.value = "Time over";
-							window.location.href = "http://www.sometimesredsometimesblue.com/"; 
-							///disable submit-button etc  
-						}  
-					}  
-					//-->  
-					</script>  
-					<body>  
-					<form action="<%=request.getRequestURL()%>" name="forma">  
-					Seconds remaining: <input type="text" name="clock" value="<%=clock%>" style="border:0px solid white">  
-					</form>  
-					<script>  
-					<!--  
-					timer();  
-					//-->  
-					</script>  
-					Question: There was a green house. Inside the green house there was a white house. Inside the white house there was a red house. Inside the red house there were lots of babies. What is it?<br>  
-					<form method="post" action='check.jsp'>
-					Answer: <input type="text" name="answer">	 
-					<input type="submit" name="ok" value="OK">   
-					</form>
-				
-				</body>
-				
-				<%
-			}
 	}
 	%>
 	</body>

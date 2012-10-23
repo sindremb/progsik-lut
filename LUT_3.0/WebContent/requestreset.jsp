@@ -14,10 +14,21 @@
 
 <%
 	boolean unameerror = false;
+	boolean isRobot = false;
 	if("POST".equalsIgnoreCase(request.getMethod())) {
+		// Brute force protection
+		Thread.sleep(2000);
+		try {
+			int captchakey=Integer.parseInt((String)session.getAttribute("key"));
+			int enterednumber=Integer.parseInt(request.getParameter("number"));
+			isRobot = captchakey != enterednumber;
+		} catch(NumberFormatException e) {
+			isRobot = true;
+		}
+		// Input validation
 		String uname = request.getParameter("uname");
 		unameerror = Pattern.compile("[^a-z0-9]", Pattern.CASE_INSENSITIVE).matcher(uname).find();
-		if(!unameerror) {
+		if(!isRobot && !unameerror) {
 			InitialContext ctx = new InitialContext();
 	        DataSource ds = (DataSource) ctx.lookup("jdbc/lut2");
 	        Connection connection = ds.getConnection();
@@ -33,18 +44,17 @@
 	        	String email = users.getString("email");
 	        	// Prepeare insert pwdreset statement
 			    PreparedStatement resetrequest = connection.prepareStatement(
-			    		"INSERT INTO pwdreset (uname,key,valid) VALUES(?,?,?)");
+			    		"INSERT INTO pwdreset VALUES(?,?,?)");
 		        // Set the value
 		        resetrequest.setString(1, uname);
 		        String key = UUID.randomUUID().toString();
 		        resetrequest.setString(2, key);
 		        Calendar cal = Calendar.getInstance();
 		        cal.add(Calendar.MINUTE, 10);
-		        resetrequest.setDate(3,new java.sql.Date(cal.getTime().getTime()));
+		        resetrequest.setTimestamp(3,new java.sql.Timestamp(cal.getTime().getTime()));
 		        // Insert the row
-		        //resetrequest.executeUpdate();
-		        // Create activate key for user
-				/*String host = "smtp.gmail.com";
+		        resetrequest.executeUpdate();
+				String host = "smtp.gmail.com";
 			    String from = "bestlut3";
 			    String pass = "nY67txzq";
 			    Properties props = System.getProperties();
@@ -79,9 +89,9 @@
 			    Transport transport = s.getTransport("smtp");
 			    transport.connect(host, from, pass);
 			    transport.sendMessage(message, message.getAllRecipients());
-			    transport.close(); */
+			    transport.close();
 				// Show confirmation page
-	        	pageContext.forward("resetrequestconfirmation.jsp");
+	        	pageContext.forward("requestresetconfirmation.jsp");
 	        } else { unameerror=true; }
 		}
 	}
@@ -116,6 +126,31 @@
 	                    	<% } %>
 	                    </td>
 	                </tr>
+	            </tbody>
+	        </table>
+	        <br />
+	        <table border="0">
+	            <thead>
+	                <tr>
+	                    <th colspan='2'>Are you a robot?</th>
+	                </tr>
+	            </thead>
+	            <tbody>
+	                <tr>
+	                	<td colspan='2'>To avoid robots taking over the world, robots are not allowed into LUT3.0. <br /><br /> 
+	                		Please undertake the following test to convince us you are not a robot</td>
+	                </tr>
+	                <tr> 
+	                	<td align="center" colspan="2">
+	                		<img src="mcap.jsp"><br><br>
+							<input type="button" value="Refresh Image" onClick="window.location.href=window.location.href"></td></tr>
+	                	<td align="center"> Please enter the answer for above calculation.</td><tr>
+					</tr>
+					<tr>
+						<td align="center"><input name="number" type="text"><% if(isRobot) { %>
+	                    		<div class='errormessage'>You are a robot, please turn into a human!</div>
+	                    	<% } %></td>
+					</tr>
 	            </tbody>
 	        </table>
 	        <input type="submit" value="Request new password" />
