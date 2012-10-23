@@ -25,9 +25,9 @@
     {
         throw new SQLException("Error establishing connection!");
     }
-    String sql = "SELECT * FROM activate WHERE uname='"+uname+"';";
-    PreparedStatement activate = connection.createStatement(ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE);
-    ResultSet rs = activate.executeQuery(sql);
+    PreparedStatement activate = connection.prepareStatement("SELECT * FROM activate WHERE uname=?");
+    activate.setString(1,uname);
+    ResultSet rs = activate.executeQuery();
     if (!rs.next())
     {
     	pageContext.forward("errorpage.jsp");
@@ -36,11 +36,14 @@
     if (!storedkey.equals(key)) {
     	pageContext.forward("errorpage.jsp");
     }
-    //rs.deleteRow();
-    String sql2 = "UPDATE users SET active=1 WHERE uname=?;";
-    PreparedStatement update = connection.prepareStatement(sql2);
+    // Activate user
+    PreparedStatement update = connection.prepareStatement("UPDATE users SET active=1 WHERE uname=?;");
     update.setString(1, uname);
-    //update.executeUpdate();
+    update.executeUpdate();
+    // Remove stored activation key for user
+    PreparedStatement remove = connection.prepareStatement("DELETE FROM activate WHERE uname=?;");
+    remove.setString(1, uname);
+    remove.executeUpdate();
     connection.commit();
 %>
 		

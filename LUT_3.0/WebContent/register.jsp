@@ -21,111 +21,115 @@
 	boolean pwdconfirmerror = false;
 	boolean unameunique = true;
 	boolean emailunique = true;
+	boolean isRobot = false;
 	if("POST".equalsIgnoreCase(request.getMethod())) {
 		// Brute force protection
-		int captchakey=Integer.parseInt((String)session.getAttribute("key"));
-		int enterednumber=Integer.parseInt(request.getParameter("number"));
-		if(captchakey == enterednumber) {
-			// Actual input collection and validation
-			String uname = request.getParameter("uname");
-			String email = request.getParameter("email");
-			String pwd = request.getParameter("pwd");
-			String pwdconfirm = request.getParameter("pwdconfirm");
-			String fname = request.getParameter("fname");
-			String lname = request.getParameter("lname");
-			unameerror = Pattern.compile("[^a-z0-9]", Pattern.CASE_INSENSITIVE).matcher(uname).find();
-			emailerror = Pattern.compile("[^a-z0-9._&@^a-z0-9.]", Pattern.CASE_INSENSITIVE).matcher(email).find();
-			pwderror = Pattern.compile("[^a-z0-9]", Pattern.CASE_INSENSITIVE).matcher(pwd).find();
-			pwdconfirmerror = !pwd.equals(pwdconfirm);
-			fnameerror = Pattern.compile("[^a-z0-9øæå]", Pattern.CASE_INSENSITIVE).matcher(fname).find();
-			lnameerror = Pattern.compile("[^a-z0-9øæå]", Pattern.CASE_INSENSITIVE).matcher(lname).find();
-			if(!unameerror && !emailerror && !pwderror && ! pwdconfirmerror && !fnameerror && !lnameerror) {
-				InitialContext ctx = new InitialContext();
-		        DataSource ds = (DataSource) ctx.lookup("jdbc/lut2");
-		        Connection connection = ds.getConnection();
-		        connection.setAutoCommit(false);
-		        if (connection == null)
-		        {
-		            throw new SQLException("Error establishing connection!");
-		        }
-		        String unamequery = "SELECT * FROM users WHERE uname='" + uname + "';";
-		        PreparedStatement unamestatement = connection.prepareStatement(unamequery);
-		        ResultSet unamers = unamestatement.executeQuery();
-		        if (unamers.next())
-		        {
-		            unameunique = false;
-		        }
-		        String emailquery = "SELECT * FROM users WHERE email='" + email + "';";
-		        PreparedStatement emailstatement = connection.prepareStatement(emailquery);
-		        ResultSet emailrs = emailstatement.executeQuery();
-		        if (emailrs.next())
-		        {
-		            emailunique = false;
-		        }
-		        if(unameunique && emailunique) {
-		        	// Prepeare insert user statement
-				    PreparedStatement createUser = connection.prepareStatement(
-				    		"INSERT INTO users (uname,email,firstname,lastname,type,active,salt) VALUES(?,?,?,?,?,?,?)");
-			        // Set the value
-			        createUser.setString(1, uname);
-			        createUser.setString(2, email);
-			        createUser.setString(3, fname);
-			        createUser.setString(4, lname);
-			        createUser.setInt(5, 2);
-			        createUser.setInt(6, 0);
-			        createUser.setString(7, UUID.randomUUID().toString());
-			        // Insert the row
-			        createUser.executeUpdate();
-			        // Create activate key for user
-					String key = UUID.randomUUID().toString();
-				    PreparedStatement activate = connection.prepareStatement("INSERT INTO activate VALUES(?,?)");
-			        // Set the value
-			        activate.setString(1, uname);
-			        activate.setString(2, key); 
-			        // Insert the row
-			        activate.executeUpdate();
-					connection.commit();
-			        // Send email
-					String host = "smtp.gmail.com";
-				    String from = "bestlut3";
-				    String pass = "nY67txzq";
-				    Properties props = System.getProperties();
-				    props.put("mail.smtp.starttls.enable", "true"); // added this line
-				    props.put("mail.smtp.host", host);
-				    props.put("mail.smtp.user", from);
-				    props.put("mail.smtp.password", pass);
-				    props.put("mail.smtp.port", "587");
-				    props.put("mail.smtp.auth", "true");
-	
-				    String[] to = {email}; // added this line
-	
-				    Session s = Session.getDefaultInstance(props, null);
-				    MimeMessage message = new MimeMessage(s);
-				    message.setFrom(new InternetAddress(from));
-	
-				    InternetAddress[] toAddress = new InternetAddress[to.length];
-	
-				    // To get the array of addresses
-				    for( int i=0; i < to.length; i++ ) { // changed from a while loop
-				        toAddress[i] = new InternetAddress(to[i]);
-				    }
-				    System.out.println(Message.RecipientType.TO);
-	
-				    for( int i=0; i < toAddress.length; i++) { // changed from a while loop
-				        message.addRecipient(Message.RecipientType.TO, toAddress[i]);
-				    }
-				    message.setSubject("Welcome to LUT3.0!");
-				    String appRoot = request.getScheme() + "://" + request.getServerName() + ":" + request.getServerPort() + request.getContextPath();
-				    message.setText("Hello, "+uname+"\n\nYou have received this email because you have registered a user with this email at the best LUT3.0"+
-				    "\n\nTo activate your account you can visit this link\n\n"+appRoot+"/activate.jsp?uname="+uname+"&key="+key);
-				    Transport transport = s.getTransport("smtp");
-				    transport.connect(host, from, pass);
-				    transport.sendMessage(message, message.getAllRecipients());
-				    transport.close();
-					// Show confirmation page
-		        	pageContext.forward("registerconfirmation.jsp");
-		        }
-			}
+		try {
+			int captchakey=Integer.parseInt((String)session.getAttribute("key"));
+			int enterednumber=Integer.parseInt(request.getParameter("number"));
+			isRobot = captchakey != enterednumber;
+		} catch(NumberFormatException e) {
+			isRobot = true;
+		}
+		// Inputcollection and validation
+		String uname = request.getParameter("uname");
+		String email = request.getParameter("email");
+		String pwd = request.getParameter("pwd");
+		String pwdconfirm = request.getParameter("pwdconfirm");
+		String fname = request.getParameter("fname");
+		String lname = request.getParameter("lname");
+		unameerror = Pattern.compile("[^.{4,16}a-z0-9]", Pattern.CASE_INSENSITIVE).matcher(uname).find();
+		emailerror = Pattern.compile("[^a-z0-9._&@^a-z0-9.]", Pattern.CASE_INSENSITIVE).matcher(email).find();
+		pwderror = Pattern.compile("[^a-z0-9]", Pattern.CASE_INSENSITIVE).matcher(pwd).find();
+		pwdconfirmerror = !pwd.equals(pwdconfirm);
+		fnameerror = Pattern.compile("[^a-z0-9øæå]", Pattern.CASE_INSENSITIVE).matcher(fname).find();
+		lnameerror = Pattern.compile("[^a-z0-9øæå]", Pattern.CASE_INSENSITIVE).matcher(lname).find();
+		if(!isRobot && !unameerror && !emailerror && !pwderror && ! pwdconfirmerror && !fnameerror && !lnameerror) {
+			InitialContext ctx = new InitialContext();
+	        DataSource ds = (DataSource) ctx.lookup("jdbc/lut2");
+	        Connection connection = ds.getConnection();
+	        connection.setAutoCommit(false);
+	        if (connection == null)
+	        {
+	            throw new SQLException("Error establishing connection!");
+	        }
+	        String unamequery = "SELECT * FROM users WHERE uname='" + uname + "';";
+	        PreparedStatement unamestatement = connection.prepareStatement(unamequery);
+	        ResultSet unamers = unamestatement.executeQuery();
+	        if (unamers.next())
+	        {
+	            unameunique = false;
+	        }
+	        String emailquery = "SELECT * FROM users WHERE email='" + email + "';";
+	        PreparedStatement emailstatement = connection.prepareStatement(emailquery);
+	        ResultSet emailrs = emailstatement.executeQuery();
+	        if (emailrs.next())
+	        {
+	            emailunique = false;
+	        }
+	        if(unameunique && emailunique) {
+	        	// Prepeare insert user statement
+			    PreparedStatement createUser = connection.prepareStatement(
+			    		"INSERT INTO users (uname,email,firstname,lastname,type,active,salt) VALUES(?,?,?,?,?,?,?)");
+		        // Set the value
+		        createUser.setString(1, uname);
+		        createUser.setString(2, email);
+		        createUser.setString(3, fname);
+		        createUser.setString(4, lname);
+		        createUser.setInt(5, 2);
+		        createUser.setInt(6, 0);
+		        createUser.setString(7, UUID.randomUUID().toString());
+		        // Insert the row
+		        createUser.executeUpdate();
+		        // Create activate key for user
+				String key = UUID.randomUUID().toString();
+			    PreparedStatement activate = connection.prepareStatement("INSERT INTO activate VALUES(?,?)");
+			    // Set the value
+		        activate.setString(1, uname);
+		        activate.setString(2, key); 
+		        // Insert the row
+		        activate.executeUpdate();
+				connection.commit();
+		        // Send email
+				String host = "smtp.gmail.com";
+			    String from = "bestlut3";
+			    String pass = "nY67txzq";
+			    Properties props = System.getProperties();
+			    props.put("mail.smtp.starttls.enable", "true"); // added this line
+			    props.put("mail.smtp.host", host);
+			    props.put("mail.smtp.user", from);
+			    props.put("mail.smtp.password", pass);
+			    props.put("mail.smtp.port", "587");
+			    props.put("mail.smtp.auth", "true");
+
+			    String[] to = {email}; // added this line
+
+			    Session s = Session.getDefaultInstance(props, null);
+			    MimeMessage message = new MimeMessage(s);
+			    message.setFrom(new InternetAddress(from));
+
+			    InternetAddress[] toAddress = new InternetAddress[to.length];
+
+			    // To get the array of addresses
+			    for( int i=0; i < to.length; i++ ) { // changed from a while loop
+			        toAddress[i] = new InternetAddress(to[i]);
+			    }
+			    System.out.println(Message.RecipientType.TO);
+
+			    for( int i=0; i < toAddress.length; i++) { // changed from a while loop
+			        message.addRecipient(Message.RecipientType.TO, toAddress[i]);
+			    }
+			    message.setSubject("Welcome to LUT3.0!");
+			    String appRoot = request.getScheme() + "://" + request.getServerName() + ":" + request.getServerPort() + request.getContextPath();
+			    message.setText("Hello, "+uname+"\n\nYou have received this email because you have registered a user with this email at the best LUT3.0"+
+			    "\n\nTo activate your account you can visit this link\n\n"+appRoot+"/activate.jsp?uname="+uname+"&key="+key);
+			    Transport transport = s.getTransport("smtp");
+			    transport.connect(host, from, pass);
+			    transport.sendMessage(message, message.getAllRecipients());
+			    transport.close();
+				// Show confirmation page
+	        	pageContext.forward("registerconfirmation.jsp");
+	        }
 		}
 	}
 %>
@@ -234,7 +238,9 @@
 	                	<td align="center"> Please enter the answer for above calculation.</td><tr>
 					</tr>
 					<tr>
-						<td align="center"><input name="number" type="text"></td>
+						<td align="center"><input name="number" type="text"><% if(isRobot) { %>
+	                    		<div class='errormessage'>You are a robot, please turn into a human!</div>
+	                    	<% } %></td>
 					</tr>
 	            </tbody>
 	        </table>
