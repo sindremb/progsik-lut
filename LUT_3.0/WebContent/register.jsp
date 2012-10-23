@@ -9,6 +9,7 @@
 <%@page import="javax.mail.internet.*,javax.activation.*"%>
 <%@page import="javax.servlet.http.*,javax.servlet.*" %>
 <%@page import="java.util.UUID" %>
+<%@page import="java.security.MessageDigest"%>
 <%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
 <%@taglib prefix="sql" uri="http://java.sun.com/jsp/jstl/sql"%>
 
@@ -42,8 +43,8 @@
 		emailerror = Pattern.compile("[^a-z0-9._&@^a-z0-9.]", Pattern.CASE_INSENSITIVE).matcher(email).find();
 		pwderror = Pattern.compile("[^a-z0-9]", Pattern.CASE_INSENSITIVE).matcher(pwd).find();
 		pwdconfirmerror = !pwd.equals(pwdconfirm);
-		fnameerror = Pattern.compile("[^a-z0-9øæå]", Pattern.CASE_INSENSITIVE).matcher(fname).find();
-		lnameerror = Pattern.compile("[^a-z0-9øæå]", Pattern.CASE_INSENSITIVE).matcher(lname).find();
+		fnameerror = Pattern.compile("[^a-z0-9Ã¸Ã¦Ã¥]", Pattern.CASE_INSENSITIVE).matcher(fname).find();
+		lnameerror = Pattern.compile("[^a-z0-9Ã¸Ã¦Ã¥]", Pattern.CASE_INSENSITIVE).matcher(lname).find();
 		if(!isRobot && !unameerror && !emailerror && !pwderror && ! pwdconfirmerror && !fnameerror && !lnameerror) {
 			InitialContext ctx = new InitialContext();
 	        DataSource ds = (DataSource) ctx.lookup("jdbc/lut2");
@@ -70,7 +71,14 @@
 	        if(unameunique && emailunique) {
 	        	// Prepeare insert user statement
 			    PreparedStatement createUser = connection.prepareStatement(
-			    		"INSERT INTO users (uname,email,firstname,lastname,type,active,salt) VALUES(?,?,?,?,?,?,?)");
+			    		"INSERT INTO users (uname,email,firstname,lastname,type,active,salt,pw) VALUES(?,?,?,?,?,?,?)");
+			  	//hashing
+		        MessageDigest digest = MessageDigest.getInstance("SHA-256");
+				digest.reset();
+				String salt = UUID.randomUUID().toString();
+				digest.update(salt.getBytes("UTF-8"));
+				String pwhash = new String(digest.digest(pwd.getBytes("UTF-8")), "UTF-8");
+		        
 		        // Set the value
 		        createUser.setString(1, uname);
 		        createUser.setString(2, email);
@@ -78,7 +86,8 @@
 		        createUser.setString(4, lname);
 		        createUser.setInt(5, 2);
 		        createUser.setInt(6, 0);
-		        createUser.setString(7, UUID.randomUUID().toString());
+		        createUser.setString(7, salt);
+		        createUser.setString(8, pwhash);
 		        // Insert the row
 		        createUser.executeUpdate();
 		        // Create activate key for user
@@ -157,7 +166,7 @@
 	                    <td>First Name</td>
 	                    <td>
 	                    	<input type='text' name='fname' value='${param.fname}' /><% if(fnameerror) { %>
-	                    		<div class='errormessage'>First name can only consist of letters [a-z+æøå]</div>
+	                    		<div class='errormessage'>First name can only consist of letters [a-z+Ã¦Ã¸Ã¥]</div>
 	                    	<% } %>
 	                    </td>
 	                </tr>
@@ -165,7 +174,7 @@
 	                    <td>Last Name</td>
 	                    <td>
 	                    	<input type='text' name='lname' value='${param.lname}' /><% if(lnameerror) { %>
-	                    		<div class='errormessage'>Username can only consist of letters [a-z+øæå]</div>
+	                    		<div class='errormessage'>Username can only consist of letters [a-z+Ã¸Ã¦Ã¥]</div>
 	                    	<% } %>
 	                    </td>
 	                </tr>
