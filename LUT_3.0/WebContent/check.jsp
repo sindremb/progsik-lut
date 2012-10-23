@@ -35,7 +35,7 @@ else {
 					<!--  
 					<%  
 					String clock = request.getParameter( "clock" );  
-						if( clock == null ) clock = "10";  
+						if( clock == null ) clock = "10000";  
 					%>  
 					var timeout = <%=clock%>;  
 					function timer()  {  
