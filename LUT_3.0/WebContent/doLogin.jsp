@@ -8,6 +8,8 @@
 <%@page import="javax.sql.DataSource"%>
 <%@page import="javax.naming.InitialContext"%>
 
+
+
 <%! 
 public static String sanitize(String s) {
   
@@ -20,12 +22,13 @@ public static String sanitize(String s) {
 }
 %>
 
-
 <% String uname="",pw=""; String number="";%>
 <% 
 	
 	int loginattempts = 1;
-	int maxattempts = 5;
+	int maxattempts = 10;
+	int timeout = 1000;
+	
 	number=request.getParameter("number");
 
 
@@ -88,7 +91,9 @@ public static String sanitize(String s) {
 			}
 		else if (key!=user) {
 			loginattempts++;
+			timeout = timeout*2;
 			if (loginattempts < maxattempts) {
+				Thread.sleep(timeout);
 			%>
 			<html>
 				<head>
@@ -100,17 +105,22 @@ public static String sanitize(String s) {
 				<body>	
 					<h1>Invalid verification code</h1>
 					<h3>Please try again</h3>
-					<jsp:include page="login.jsp"/>
-				<% 
+					<jsp:include page="login.jsp"/> 
+					
+			<% 
 			}
 			else {
-				response.sendRedirect("http://www.vg.no");
+				response.sendRedirect("http://www.sometimesredsometimesblue.com/");
+				
 			}
 		}
 		else 
 			{
 			loginattempts++;
+			timeout = timeout*2;
 			if (loginattempts < maxattempts) {
+				Thread.sleep(timeout);
+				
 			%>
 				<html>
 				<head>
@@ -123,12 +133,13 @@ public static String sanitize(String s) {
 					<h1>Invalid username or password</h1>
 					<h3>Please try again</h3>
 					<jsp:include page="login.jsp"/>
+					
+   					 
 			<% 
 			}
 			else {
-			response.sendRedirect("http://www.vg.no");
+			response.sendRedirect("http://www.sometimesredsometimesblue.com/");
 			} 
-		
 	
 	}
 	%>
