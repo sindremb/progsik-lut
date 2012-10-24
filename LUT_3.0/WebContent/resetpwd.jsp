@@ -14,80 +14,90 @@
 
 <%
 	//Brute force protection
-	Thread.sleep(2000);
+	try{
+		Thread.sleep(2000);
+	} catch (Exception e) {}
 	boolean isRobot = false;
 	// Get and validate required params (both get and post)
 	String uname = request.getParameter("uname");
 	String key = request.getParameter("key");
 	boolean unameerror = Pattern.compile("[^a-z0-9]", Pattern.CASE_INSENSITIVE).matcher(uname).find();
 	boolean keyerror = Pattern.compile("[^a-z0-9-]", Pattern.CASE_INSENSITIVE).matcher(key).find();
+	boolean pwderror = false;
+	boolean pwdconfirmerror = false;
 	if(unameerror || keyerror) {
 		pageContext.forward("errorpage.jsp");
 	}
 	// Check if pwd reset request exists, has valid key and is not expired
-	InitialContext ctx = new InitialContext();
-    DataSource ds = (DataSource) ctx.lookup("jdbc/lut2");
-    Connection connection = ds.getConnection();
-    connection.setAutoCommit(false);
-    if (connection == null)
-    {
-        throw new SQLException("Error establishing connection!");
-    }
-    PreparedStatement resetrequest = connection.prepareStatement("SELECT * FROM pwdreset WHERE uname=?");
-    resetrequest.setString(1, uname);
-    ResultSet rs = resetrequest.executeQuery();
-    if (!rs.next())
-    {
-    	pageContext.forward("errorpage.jsp");
-    }
-    // expiration
-    Calendar cal = Calendar.getInstance();
-    java.sql.Timestamp current = new java.sql.Timestamp(cal.getTime().getTime());
-    java.sql.Timestamp valid = rs.getTimestamp("valid");
-    // Check for valid reset key
-	String storedkey = rs.getString("key");
-    if (current.compareTo(valid) > 0 || !storedkey.equals(key)) {
-    	pageContext.forward("errorpage.jsp");
-    }
-	boolean pwderror = false;
-	boolean pwdconfirmerror = false;
-	// If post request - check if valid new pwd info is given -> update
-	if("POST".equalsIgnoreCase(request.getMethod())) {
-		// Bot protection
-		try {
-			int captchakey=Integer.parseInt((String)session.getAttribute("key"));
-			int enterednumber=Integer.parseInt(request.getParameter("number"));
-			isRobot = captchakey != enterednumber;
-		} catch(NumberFormatException e) {
-			isRobot = true;
+	Connection connection = null;
+	try {
+		InitialContext ctx = new InitialContext();
+	    DataSource ds = (DataSource) ctx.lookup("jdbc/lut2");
+	    connection = ds.getConnection();
+	    connection.setAutoCommit(false);
+	    if (connection == null)
+	    {
+	        throw new SQLException("Error establishing connection!");
+	    }
+	    PreparedStatement resetrequest = connection.prepareStatement("SELECT * FROM pwdreset WHERE uname=?");
+	    resetrequest.setString(1, uname);
+	    ResultSet rs = resetrequest.executeQuery();
+	    if (!rs.next())
+	    {
+	    	pageContext.forward("errorpage.jsp");
+	    }
+	    // expiration
+	    Calendar cal = Calendar.getInstance();
+	    java.sql.Timestamp current = new java.sql.Timestamp(cal.getTime().getTime());
+	    java.sql.Timestamp valid = rs.getTimestamp("valid");
+	    // Check for valid reset key
+		String storedkey = rs.getString("key");
+	    if (current.compareTo(valid) > 0 || !storedkey.equals(key)) {
+	    	pageContext.forward("errorpage.jsp");
+	    }
+		// If post request - check if valid new pwd info is given -> update
+		if("POST".equalsIgnoreCase(request.getMethod())) {
+			// Bot protection
+			try {
+				int captchakey=Integer.parseInt((String)session.getAttribute("key"));
+				int enterednumber=Integer.parseInt(request.getParameter("number"));
+				isRobot = captchakey != enterednumber;
+			} catch(NumberFormatException e) {
+				isRobot = true;
+			}
+			// input validation
+			String pwd = request.getParameter("pwd");
+			String pwdconfirm = request.getParameter("pwdconfirm");
+			pwderror = Pattern.compile("[^a-z0-9]", Pattern.CASE_INSENSITIVE).matcher(pwd).find();
+			pwdconfirmerror = !pwd.equals(pwdconfirm);
+			if(!isRobot && !pwderror && ! pwdconfirmerror) {
+			    //hashing
+		        MessageDigest digest = MessageDigest.getInstance("SHA-256");
+				digest.reset();
+				String salt = UUID.randomUUID().toString();
+				digest.update(salt.getBytes("UTF-8"));
+				String pwhash = new String(digest.digest(pwd.getBytes("UTF-8")), "UTF-8");
+		        // Update pwdhash (and salt)
+		        PreparedStatement resetpwd = connection.prepareStatement(
+			    		"UPDATE users SET salt = ? , pw = ? WHERE uname = ?");
+		        resetpwd.setString(1, salt);
+		        resetpwd.setString(2, pwhash);
+		        resetpwd.setString(3, uname);
+		        resetpwd.executeUpdate();
+		     // Remove old reset key for user
+		        PreparedStatement remove = connection.prepareStatement("DELETE FROM pwdreset WHERE uname=?;");
+		        remove.setString(1, uname);
+		        remove.executeUpdate();
+		        connection.commit();
+		        if(connection != null) connection.close();
+				// Show confirmation page
+	        	pageContext.forward("resetpwdconfirmation.jsp");
+			}
 		}
-		// input validation
-		String pwd = request.getParameter("pwd");
-		String pwdconfirm = request.getParameter("pwdconfirm");
-		pwderror = Pattern.compile("[^a-z0-9]", Pattern.CASE_INSENSITIVE).matcher(pwd).find();
-		pwdconfirmerror = !pwd.equals(pwdconfirm);
-		if(!isRobot && !pwderror && ! pwdconfirmerror) {
-		    //hashing
-	        MessageDigest digest = MessageDigest.getInstance("SHA-256");
-			digest.reset();
-			String salt = UUID.randomUUID().toString();
-			digest.update(salt.getBytes("UTF-8"));
-			String pwhash = new String(digest.digest(pwd.getBytes("UTF-8")), "UTF-8");
-	        // Update pwdhash (and salt)
-	        PreparedStatement resetpwd = connection.prepareStatement(
-		    		"UPDATE users SET salt = ? , pw = ? WHERE uname = ?");
-	        resetpwd.setString(1, salt);
-	        resetpwd.setString(2, pwhash);
-	        resetpwd.setString(3, uname);
-	        resetpwd.executeUpdate();
-	     // Remove old reset key for user
-	        PreparedStatement remove = connection.prepareStatement("DELETE FROM resetpwd WHERE uname=?;");
-	        remove.setString(1, uname);
-	        remove.executeUpdate();
-	        connection.commit();
-			// Show confirmation page
-        	pageContext.forward("resetpwdconfirmation.jsp");
-		}
+	} catch (Exception e) {
+		pageContext.forward("errorpage.jsp");
+	} finally {
+		if(connection != null) connection.close();
 	}
 %>
 		
@@ -158,7 +168,7 @@
 					</tr>
 	            </tbody>
 	        </table>
-	        <input type="submit" value="Request new password" />
+	        <input type="submit" value="Reset Password" />
     	</form>
     </body>
 </html>

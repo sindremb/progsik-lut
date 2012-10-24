@@ -10,6 +10,10 @@
 <%@taglib prefix="sql" uri="http://java.sun.com/jsp/jstl/sql"%>
 
 <%
+	// brute force protection
+	try {
+		Thread.sleep(2000);
+	} catch (Exception e) {}
 	String uname = request.getParameter("uname");
 	String key = request.getParameter("key");
 	boolean unameerror = Pattern.compile("[^a-z0-9]", Pattern.CASE_INSENSITIVE).matcher(uname).find();
@@ -17,34 +21,41 @@
 	if(unameerror || keyerror) {
 		pageContext.forward("errorpage.jsp");
 	}
-	InitialContext ctx = new InitialContext();
-    DataSource ds = (DataSource) ctx.lookup("jdbc/lut2");
-    Connection connection = ds.getConnection();
-    connection.setAutoCommit(false);
-    if (connection == null)
-    {
-        throw new SQLException("Error establishing connection!");
-    }
-    PreparedStatement activate = connection.prepareStatement("SELECT * FROM activate WHERE uname=?");
-    activate.setString(1,uname);
-    ResultSet rs = activate.executeQuery();
-    if (!rs.next())
-    {
-    	pageContext.forward("errorpage.jsp");
-    }
-    String storedkey = rs.getString("key");
-    if (!storedkey.equals(key)) {
-    	pageContext.forward("errorpage.jsp");
-    }
-    // Activate user
-    PreparedStatement update = connection.prepareStatement("UPDATE users SET active=1 WHERE uname=?;");
-    update.setString(1, uname);
-    update.executeUpdate();
-    // Remove stored activation key for user
-    PreparedStatement remove = connection.prepareStatement("DELETE FROM activate WHERE uname=?;");
-    remove.setString(1, uname);
-    remove.executeUpdate();
-    connection.commit();
+	Connection connection = null;
+	try {
+		InitialContext ctx = new InitialContext();
+	    DataSource ds = (DataSource) ctx.lookup("jdbc/lut2");
+	    connection = ds.getConnection();
+	    connection.setAutoCommit(false);
+	    if (connection == null)
+	    {
+	        throw new SQLException("Error establishing connection!");
+	    }
+	    PreparedStatement activate = connection.prepareStatement("SELECT * FROM activate WHERE uname=?");
+	    activate.setString(1,uname);
+	    ResultSet rs = activate.executeQuery();
+	    if (!rs.next())
+	    {
+	    	pageContext.forward("errorpage.jsp");
+	    }
+	    String storedkey = rs.getString("key");
+	    if (!storedkey.equals(key)) {
+	    	pageContext.forward("errorpage.jsp");
+	    }
+	    // Activate user
+	    PreparedStatement update = connection.prepareStatement("UPDATE users SET active=1 WHERE uname=?;");
+	    update.setString(1, uname);
+	    update.executeUpdate();
+	    // Remove stored activation key for user
+	    PreparedStatement remove = connection.prepareStatement("DELETE FROM activate WHERE uname=?;");
+	    remove.setString(1, uname);
+	    remove.executeUpdate();
+	    connection.commit();
+	} catch (Exception e) {
+ 		pageContext.forward("errorpage.jsp");
+	} finally {
+ 		if(connection != null) connection.close();
+ 	}
 %>
 		
 <%@page contentType="text/html" pageEncoding="UTF-8"%>

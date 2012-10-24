@@ -161,12 +161,13 @@ public static String sanitize(String s) {
 			String storedhash = rs.getString("pw");
 			String salt = rs.getString("salt");
 			String type = rs.getString("type");
+			boolean active = rs.getInt("active") == 1;
 			//hashing
 	        MessageDigest digest = MessageDigest.getInstance("SHA-256");
 			digest.reset();
 			digest.update(salt.getBytes("UTF-8"));
 			String pwhash = new String(digest.digest(pw.getBytes("UTF-8")), "UTF-8");
-			if(storedhash.equals(pwhash)) {
+			if(storedhash.equals(pwhash) && active) {
 				if ("1".equals(type)) {
 					session.setAttribute("uname",uname);
 					session.setAttribute("type", "1");
