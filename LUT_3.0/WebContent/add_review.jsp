@@ -37,6 +37,7 @@ if (redirect){
 String school_id = request.getParameter("school_id");
 String review = request.getParameter("review");
 
+
 InitialContext ctx = new InitialContext();
 DataSource ds = (DataSource) ctx.lookup("jdbc/lut2");
 Connection connection = ds.getConnection();
@@ -45,19 +46,44 @@ if (connection == null)
 {
 	throw new SQLException("Error establishing connection!");
 }
-
-String query = "INSERT INTO user_reviews VALUES (?, ?, ?)";
+String query = "select * from school where school_id = ?";
 PreparedStatement statement = connection.prepareStatement(query);
+statement.setString(1, school_id);
+
+try{
+	ResultSet rs2 = statement.executeQuery();
+	if(!rs2.next()) response.sendRedirect("index.jsp");
+}
+catch(Exception e){
+	if(connection != null){
+		connection.close();
+	}
+	response.sendRedirect("errorpage.jsp");
+}
+
+
+ctx = new InitialContext();
+ds = (DataSource) ctx.lookup("jdbc/lut2");
+connection = ds.getConnection();
+
+
+query = "INSERT INTO user_reviews VALUES (?, ?, ?)";
+statement = connection.prepareStatement(query);
 statement.setString(1, sanitize(school_id));
 statement.setString(2, uname);
 statement.setString(3, sanitize(review));
+>>>>>>> de240cf284ae75d29f98989631418396f4f1ec5d
 try {
 	statement.executeUpdate();
 }
 catch(Exception e){
 	response.sendRedirect("errorpage.jsp");
 }
-connection.close();
+finally{
+	if (connection != null){
+		connection.close();
+	}
+}
 
 %>
 		

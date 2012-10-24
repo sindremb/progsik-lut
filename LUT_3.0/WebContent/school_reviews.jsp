@@ -45,6 +45,9 @@ try{
 		response.sendRedirect("index.jsp");
 	}
 }catch (Exception e){
+	if (connection != null){
+		connection.close();
+	}
 	response.sendRedirect("errorpage.jsp");
 }
 String fullname = rs.getString("full_name");
@@ -59,7 +62,11 @@ try{
 }catch (Exception e){
 	response.sendRedirect("errorpage.jsp");
 }
-connection.close();
+finally{
+	if (connection != null){
+		connection.close();
+	}
+}
 	
 %>
 

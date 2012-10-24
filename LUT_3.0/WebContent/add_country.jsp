@@ -102,17 +102,19 @@ if (redirect){
 	    		statement.executeUpdate();
 	    	}
 	    	catch(Exception e){
+	    		
+	    		response.sendRedirect("lutadmin.jsp");
+	    	}
+	    	finally{
 	    		if (connection != null){
 		    		connection.close();
 		    	}
-	    		response.sendRedirect("lutadmin.jsp");
 	    	}
 	    	
 	    	out.println("The following country was added  <br>");
 	    	out.println("Full name is <br> " + fullname);
 	    	out.println("Short name is <br>" + shortname);
 		}
-	   	connection.close();
 	   	
     }
 	out.print("<a href = 'lutadmin.jsp'>Back to admin page</a>");
