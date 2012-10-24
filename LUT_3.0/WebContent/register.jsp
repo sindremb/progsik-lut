@@ -52,7 +52,7 @@
 			Connection connection = null;
 			try {
 				InitialContext ctx = new InitialContext();
-		        DataSource ds = (DataSource) ctx.lookup("jdbc/lut2");
+		        DataSource ds = (DataSource) ctx.lookup("jdbc/lut2read");
 		        connection = ds.getConnection();
 		        connection.setAutoCommit(false);
 		        if (connection == null)
@@ -76,6 +76,9 @@
 		            emailunique = false;
 		        }
 		        if(unameunique && emailunique) {
+		        	connection.close()
+		        	ds = (DataSource) ctx.lookup("jdbc/lut2write");
+		        	connection = ds.getConnection();
 		        	// Prepeare insert user statement
 				    PreparedStatement createUser = connection.prepareStatement(
 				    		"INSERT INTO users (uname,email,firstname,lastname,type,active,salt,pw) VALUES(?,?,?,?,?,?,?,?)");

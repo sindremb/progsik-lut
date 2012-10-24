@@ -11,6 +11,7 @@ if (type == null){
 
 if (redirect){
 	response.sendRedirect("login.jsp");
+	return;
 }
 
 %>

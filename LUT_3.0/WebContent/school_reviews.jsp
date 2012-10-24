@@ -12,6 +12,7 @@ if (type == null){
 
 if (redirect){
 	response.sendRedirect("login.jsp");
+	return;
 }
 
 %>
@@ -29,7 +30,7 @@ String school_id = request.getParameter("school_id");
 if(school_id == null || school_id.length() == 0) pageContext.forward("errorpage.jsp");
 
 InitialContext ctx = new InitialContext();
-DataSource ds = (DataSource) ctx.lookup("jdbc/lut2");
+DataSource ds = (DataSource) ctx.lookup("jdbc/lut2read");
 Connection connection = ds.getConnection();
 
 if (connection == null)
