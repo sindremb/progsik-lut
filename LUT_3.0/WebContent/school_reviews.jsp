@@ -50,10 +50,9 @@ try{
 String fullname = rs.getString("full_name");
 String shortname = rs.getString("short_name");
 
-query = "SELECT review, lastname, firstname FROM user_reviews, users WHERE user_id = uname AND school_id = ? and ";
+query = "SELECT user_reviews.review, users.lastname, users.firstname FROM user_reviews, users WHERE user_id = uname AND school_id = ?";
 statement = connection.prepareStatement(query);
 statement.setString(1, school_id);
-
 
 try{
 	rs = statement.executeQuery();
@@ -110,6 +109,7 @@ connection.close();
                             </textarea>
                             <br><br>
                             <input type="submit" value="Add review" />
+                        </form>
                     </td>
                 </tr>
             </tbody>

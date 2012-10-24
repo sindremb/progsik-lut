@@ -104,8 +104,6 @@ connection.close();
         	out.print("<span style='font-size:smaller; font-style:italic;'>zip: "+ zip + "</span></td></tr>" );
         	out.print("<tr><td><form action='school_reviews.jsp'>");
         	out.print("<input type='hidden' name='school_id' value='" + school_id + "' />");
-        	out.print("<input type='hidden' name='school_fullname' value='" + fullname + "' />");
-        	out.print("<input type='hidden' name='school_shortname' value='" + shortname + "' />");
         	out.print("<input type='submit' name='Read reviews' />");
         	out.print("</form></td></tr></tbody>");
         }
