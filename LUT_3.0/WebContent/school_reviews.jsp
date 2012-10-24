@@ -45,6 +45,7 @@ try{
 	rs = statement.executeQuery();
 	if (!rs.next()){
 		response.sendRedirect("index.jsp");
+		return;
 	}
 }catch (Exception e){
 	//response.sendRedirect("errorpage.jsp");
@@ -61,7 +62,7 @@ try{
 	rs = statement.executeQuery();
 	if(rs.next()) reviewed = true;
 }catch (Exception e){
-	response.sendRedirect("errorpage.jsp");
+	pageContext.forward("errorpage.jsp");
 }
 
 query = "SELECT user_reviews.review, users.lastname, users.firstname FROM user_reviews, users WHERE user_id = uname AND school_id = ?";
@@ -71,7 +72,7 @@ statement.setString(1, school_id);
 try{
 	rs = statement.executeQuery();
 }catch (Exception e){
-	response.sendRedirect("errorpage.jsp");
+	pageContext.forward("errorpage.jsp");
 }
 finally{
 	if (connection != null){
