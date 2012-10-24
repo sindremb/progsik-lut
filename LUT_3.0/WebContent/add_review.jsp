@@ -24,6 +24,7 @@ if (type == null){
 
 if (redirect){
 	response.sendRedirect("login.jsp");
+	return;
 }
 
 %><%@page import="java.sql.ResultSet"%>
@@ -58,7 +59,7 @@ catch(Exception e){
 	if(connection != null){
 		connection.close();
 	}
-	response.sendRedirect("errorpage.jsp");
+	pageContext.forward("errorpage.jsp");
 }
 boolean duplicate = false;
 try {
@@ -86,7 +87,7 @@ if(!duplicate && review != null && review.length() != 0 && review.trim().length(
 		statement.executeUpdate();
 	}
 	catch(Exception e){
-		response.sendRedirect("errorpage.jsp");
+		pageContext.forward("errorpage.jsp");
 	}
 	finally{
 		if (connection != null){
@@ -95,6 +96,7 @@ if(!duplicate && review != null && review.length() != 0 && review.trim().length(
 	}
 } else {
 	response.sendRedirect("school_reviews.jsp?school_id="+school_id);
+	return;
 }
 %>
 		
