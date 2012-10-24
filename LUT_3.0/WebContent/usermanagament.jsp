@@ -11,9 +11,11 @@ if (type == null){
 
 if (redirect){
 	response.sendRedirect("login.jsp");
+	return;
 }
-
 %>
+
+
 <%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
 <%@taglib prefix="sql" uri="http://java.sun.com/jsp/jstl/sql"%>
 <%@page import="java.sql.ResultSet"%>
@@ -23,9 +25,13 @@ if (redirect){
 <%@page import="javax.sql.DataSource"%>
 <%@page import="javax.naming.InitialContext"%>
 <%
+out.print(session.getAttribute("uname"));
+
 InitialContext ctx = new InitialContext();
 DataSource ds = (DataSource) ctx.lookup("jdbc/lut2");
 Connection connection = ds.getConnection();
+
+
 
 if (connection == null)
 {
@@ -33,7 +39,7 @@ if (connection == null)
 }
 
 
-String query ="select uname, type, active from country users";
+String query ="select uname, type, active from users";
 PreparedStatement statement = connection.prepareStatement(query);
 ResultSet rs = null;
 try{
@@ -69,7 +75,7 @@ finally{
     			<td><strong>Type</strong></td>
     		</tr>
     		<%	
-    			String uname = "";
+    			String username = "";
     			int type = 0;
     			String typestring = "";
     			int active = 0;
@@ -77,12 +83,12 @@ finally{
     			int newtype = 0;
     			String newtypestring = "";
 				while(rs.next()){
-					uname = rs.getString("uname");
+					username = rs.getString("uname");
 					type = rs.getInt("type");
 					active = rs.getInt("active");
 					if (type == 1){
 						typestring = "Admin";
-						newtype = 0;
+						newtype = 2;
 						newtypestring = "Make regular user";
 					}else if (type == 2){
 						typestring = "User";
@@ -95,23 +101,23 @@ finally{
 						activestring = "Validated";
 					}
 					out.print("<tr>");
-					out.print("<td>" + uname + "</td>");
+					out.print("<td>" + username + "</td>");
 					out.print("<td>" + typestring + "</td>");
 					out.print("<td>" + activestring + "</td>");
-					out.print("<td><form action = 'usermanagement.jsp' method = post>
+					out.print("<td><form action = 'changeusertype.jsp' method = post>");
 					out.print("<input type = 'hidden' name = 'newtype' value = '" + newtype + "'/>");
-					out.print("<input type = 'hidden' name = 'uname' value = '" + uname + "'/>");
-					out.print("<input type = 'submit' value = '" + newtypestring +  "' /></td>");
-					out.print("<td><form action = 'usermanagement.jsp' method = post>
+					out.print("<input type = 'hidden' name = 'uname' value = '" + username + "'/>");
+					out.print("<input type = 'submit' value = '" + newtypestring +  "' /></td></form>");
+					out.print("<td><form action = 'deleteuser.jsp' method = post>");
 					out.print("<input type = 'hidden' name = 'delete' value = 'true'/>");
-					out.print("<input type = 'hidden' name = 'uname' value = '" + uname + "'/>");
-					out.print("<input type = 'submit' value = 'Delete user' /></td>");
+					out.print("<input type = 'hidden' name = 'uname' value = '" + username + "'/>");
+					out.print("<input type = 'submit' value = 'Delete user' /></td></form>");
 					out.print("</tr>");
 					
 				}
     		%>
     	</table>
-    
+    	<% out.print("<a href = 'lutadmin.jsp'>Back to admin page</a>");%>
     
     </body>
 </html>
