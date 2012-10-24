@@ -34,8 +34,8 @@ if (redirect){
 <%@page import="javax.naming.InitialContext"%>
 
  <%
-String school_id = request.getParameter("school_id");
-String review = request.getParameter("review");
+String school_id = sanitize(request.getParameter("school_id"));
+String review = sanitize(request.getParameter("review"));
 
 
 InitialContext ctx = new InitialContext();
@@ -60,31 +60,42 @@ catch(Exception e){
 	}
 	response.sendRedirect("errorpage.jsp");
 }
-
-
-ctx = new InitialContext();
-ds = (DataSource) ctx.lookup("jdbc/lut2");
-connection = ds.getConnection();
-
-
-query = "INSERT INTO user_reviews VALUES (?, ?, ?)";
-statement = connection.prepareStatement(query);
-statement.setString(1, sanitize(school_id));
-statement.setString(2, uname);
-statement.setString(3, sanitize(review));
->>>>>>> de240cf284ae75d29f98989631418396f4f1ec5d
+boolean duplicate = false;
 try {
-	statement.executeUpdate();
+	connection = ds.getConnection();
+} catch (Exception e) {
+	pageContext.forward("errorpage.jsp");
+	statement = connection.prepareStatement("SELECT * FROM user_reviews WHERE school_id = ? AND user_id = ?");
+	statement.setString(1, school_id);
+	statement.setString(2, uname);
+	ResultSet existing = statement.executeQuery();
+	if(existing.next()) duplicate = true;
+} finally {
+	if(connection != null) connection.close();
 }
-catch(Exception e){
-	response.sendRedirect("errorpage.jsp");
-}
-finally{
-	if (connection != null){
-		connection.close();
+if(!duplicate && review != null && review.length() != 0 && review.trim().length() != 0) {
+	ctx = new InitialContext();
+	ds = (DataSource) ctx.lookup("jdbc/lut2"); // write access
+	connection = ds.getConnection();
+	query = "INSERT INTO user_reviews VALUES (?, ?, ?)";
+	statement = connection.prepareStatement(query);
+	statement.setString(1, school_id);
+	statement.setString(2, uname);
+	statement.setString(3, review);
+	try {
+		statement.executeUpdate();
 	}
+	catch(Exception e){
+		response.sendRedirect("errorpage.jsp");
+	}
+	finally{
+		if (connection != null){
+			connection.close();
+		}
+	}
+} else {
+	response.sendRedirect("school_reviews.jsp?school_id="+school_id);
 }
-
 %>
 		
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
