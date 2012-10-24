@@ -40,7 +40,7 @@
     {
     	pageContext.forward("errorpage.jsp");
     }
-    // Check for expiration
+    // expiration
     Calendar cal = Calendar.getInstance();
     java.sql.Timestamp current = new java.sql.Timestamp(cal.getTime().getTime());
     java.sql.Timestamp valid = rs.getTimestamp("valid");
@@ -73,14 +73,17 @@
 			String salt = UUID.randomUUID().toString();
 			digest.update(salt.getBytes("UTF-8"));
 			String pwhash = new String(digest.digest(pwd.getBytes("UTF-8")), "UTF-8");
-	        // Set the value
+	        // Update pwdhash (and salt)
 	        PreparedStatement resetpwd = connection.prepareStatement(
 		    		"UPDATE users SET salt = ? , pw = ? WHERE uname = ?");
 	        resetpwd.setString(1, salt);
 	        resetpwd.setString(2, pwhash);
 	        resetpwd.setString(3, uname);
-	        // Insert the row
 	        resetpwd.executeUpdate();
+	     // Remove old reset key for user
+	        PreparedStatement remove = connection.prepareStatement("DELETE FROM resetpwd WHERE uname=?;");
+	        remove.setString(1, uname);
+	        remove.executeUpdate();
 	        connection.commit();
 			// Show confirmation page
         	pageContext.forward("resetpwdconfirmation.jsp");
@@ -144,8 +147,9 @@
 	                <tr> 
 	                	<td align="center" colspan="2">
 	                		<img src="mcap.jsp"><br><br>
-							<input type="button" value="Refresh Image" onClick="window.location.href=window.location.href"></td></tr>
-	                	<td align="center"> Please enter the answer for above calculation.</td><tr>
+							<input type="button" value="Refresh Image" onClick="window.location.href=window.location.href"><br /><br />
+	                		Please enter the answer for above calculation.
+	                	</td>
 					</tr>
 					<tr>
 						<td align="center"><input name="number" type="text"><% if(isRobot) { %>
