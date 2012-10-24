@@ -96,8 +96,9 @@ session.setMaxInactiveInterval(900 * 1); //automatic logout after 900 seconds :P
         <br>
         <br>
         <form action="logout.jsp" method="post">
-        	<input type=submit value = Log_out>
+        	<input type="submit" value = "Log out">
         </form>
+        
 
     </body>
 </html>
