@@ -40,7 +40,7 @@ String review = sanitize(request.getParameter("review"));
 
 
 InitialContext ctx = new InitialContext();
-DataSource ds = (DataSource) ctx.lookup("jdbc/lut2");
+DataSource ds = (DataSource) ctx.lookup("jdbc/lut2read");
 Connection connection = ds.getConnection();
 
 if (connection == null)
@@ -76,7 +76,7 @@ try {
 }
 if(!duplicate && review != null && review.length() != 0 && review.trim().length() != 0) {
 	ctx = new InitialContext();
-	ds = (DataSource) ctx.lookup("jdbc/lut2"); // write access
+	ds = (DataSource) ctx.lookup("jdbc/lut2write"); // write access
 	connection = ds.getConnection();
 	query = "INSERT INTO user_reviews VALUES (?, ?, ?)";
 	statement = connection.prepareStatement(query);
