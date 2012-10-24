@@ -35,8 +35,18 @@ if (connection == null)
 
 String query = "select full_name from country"; 
 PreparedStatement statement = connection.prepareStatement(query);
-ResultSet rs = statement.executeQuery();
-connection.close();
+ResultSet rs = null;
+try{
+	rs = statement.executeQuery();
+}
+catch(Exception e){
+	response.sendRedirect("errorpage.jsp");	
+}
+finally{
+	if (connection != null){
+		connection.close();
+	}
+}
 
 %>
 

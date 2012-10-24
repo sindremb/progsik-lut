@@ -44,6 +44,9 @@ try{
 		response.sendRedirect("index.jsp");
 	}
 }catch(Exception e){
+	if (connection != null){
+		connection.close();
+	}
 	response.sendRedirect("errorpage.jsp");
 }
 
@@ -56,12 +59,15 @@ try{
 	rs = statement.executeQuery();
 	}
 catch(Exception e){
-	connection.close();
 	response.sendRedirect("errorpage.jsp");
 	
 }
+finally{
+	if(connection != null){
+		connection.close();
+	}
+}
 
-connection.close();
 %>
 
 
