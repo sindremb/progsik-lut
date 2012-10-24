@@ -119,7 +119,11 @@ if (redirect){
 	   	
     }
 	out.print("<a href = 'lutadmin.jsp'>Back to admin page</a>");
+	
 %>
-    
+    <form action="logout.jsp" method="post">
+        	<input type="submit" value = "Log out">
+        </form>
+        
 </body>
 </html>

@@ -48,5 +48,9 @@ if (redirect){
 				</tr>
         	</tbody>
         </table>
+        <form action="logout.jsp" method="post">
+        	<input type="submit" value = "Log out">
+        </form>
+        
     </body>
 </html>

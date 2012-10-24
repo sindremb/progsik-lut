@@ -28,7 +28,7 @@ if (redirect){
 out.print(session.getAttribute("uname"));
 
 InitialContext ctx = new InitialContext();
-DataSource ds = (DataSource) ctx.lookup("jdbc/lut2");
+DataSource ds = (DataSource) ctx.lookup("jdbc/lut2read");
 Connection connection = ds.getConnection();
 
 
@@ -120,4 +120,8 @@ finally{
     	<% out.print("<a href = 'lutadmin.jsp'>Back to admin page</a>");%>
     
     </body>
+    <form action="logout.jsp" method="post">
+        	<input type="submit" value = "Log out">
+        </form>
+        
 </html>

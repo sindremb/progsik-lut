@@ -1,9 +1,6 @@
 <%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
 <%@taglib prefix="sql" uri="http://java.sun.com/jsp/jstl/sql"%>
 
-<%
-	// Possibly do some handling of different error codes and what message to displey (controlled by for example errorpage.jsp?code=404 )
-%>
 		
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <!DOCTYPE html>

@@ -168,7 +168,10 @@ if (!(fullname.equals(""))&& !(shortname.equals("")) && !(place.equals("")) && !
     }
 	out.print("<a href = 'lutadmin.jsp'>Back to admin page</a>");	
 %>
-
+<form action="logout.jsp" method="post">
+        	<input type="submit" value = "Log out">
+        </form>
+        
  
 
 </body>
