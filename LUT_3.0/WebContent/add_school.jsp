@@ -75,6 +75,9 @@ if (redirect){
 			    	rs = statement.executeQuery();
 			    }
 			    catch (Exception e){
+			    	if (connection != null){
+			    		connection.close();
+			    	}
 			    	response.sendRedirect("lutadmin.jsp");
 			    }
 			    String short_name = "";
@@ -85,7 +88,11 @@ if (redirect){
 			   		full_name = rs.getString("full_name");
 			    	out.print("<option value = '" + short_name +"' >" + full_name + "</option>" );
 				} 
-			   	connection.close();
+			   	finally{
+			   		if (connection != null){
+				   	connection.close();
+			   		}
+			   	}
 				%>
 				</select></td>
 			<tr>

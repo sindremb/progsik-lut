@@ -26,6 +26,7 @@ String school_id = request.getParameter("school_id");
 String review = request.getParameter("review");
 String name = request.getParameter("name");
 
+
 InitialContext ctx = new InitialContext();
 DataSource ds = (DataSource) ctx.lookup("jdbc/lut2");
 Connection connection = ds.getConnection();
@@ -34,9 +35,28 @@ if (connection == null)
 {
 	throw new SQLException("Error establishing connection!");
 }
-
-String query = "INSERT INTO user_reviews VALUES (?, ?, ?)";
+String query = "select * from school where school_id = ?";
 PreparedStatement statement = connection.prepareStatement(query);
+statement.setString(1, school_id);
+
+try{
+	statement.executeQuery();
+}
+catch(Exception e){
+	if(connection != null){
+		connection.close();
+	}
+	response.sendRedirect("errorpage.jsp");
+}
+
+
+ctx = new InitialContext();
+ds = (DataSource) ctx.lookup("jdbc/lut2");
+connection = ds.getConnection();
+
+
+query = "INSERT INTO user_reviews VALUES (?, ?, ?)";
+statement = connection.prepareStatement(query);
 statement.setString(1, school_id);
 statement.setString(2, name);
 statement.setString(3, review);
@@ -46,7 +66,11 @@ try {
 catch(Exception e){
 	response.sendRedirect("errorpage.jsp");
 }
-connection.close();
+finally{
+	if (connection != null){
+		connection.close();
+	}
+}
 
 %>
 		
