@@ -35,7 +35,7 @@
 	Connection connection = null;
 	try {
 		InitialContext ctx = new InitialContext();
-	    DataSource ds = (DataSource) ctx.lookup("jdbc/lut2");
+	    DataSource ds = (DataSource) ctx.lookup("jdbc/lut2write");
 	    connection = ds.getConnection();
 	    connection.setAutoCommit(false);
 	    if (connection == null)
