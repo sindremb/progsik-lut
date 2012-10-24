@@ -25,8 +25,6 @@ if (redirect){
 <%
 
 String school_id = request.getParameter("school_id");
-String fullname = request.getParameter("school_fullname");
-String shortname = request.getParameter("school_shortname");
 
 InitialContext ctx = new InitialContext();
 DataSource ds = (DataSource) ctx.lookup("jdbc/lut2");
@@ -37,11 +35,9 @@ if (connection == null)
 	throw new SQLException("Error establishing connection!");
 }
 
-String query = "select * from school where school_id = ? AND full_name = ? AND short_name = ?";
+String query = "select * from school where school_id = ?";
 PreparedStatement statement = connection.prepareStatement(query);
 statement.setString(1, school_id);
-statement.setString(2, fullname);
-statement.setString(3, shortname);
 ResultSet rs = null;
 try{
 	rs = statement.executeQuery();
@@ -54,9 +50,10 @@ try{
 	}
 	response.sendRedirect("errorpage.jsp");
 }
+String fullname = rs.getString("full_name");
+String shortname = rs.getString("short_name");
 
-
-query = "select * from user_reviews where school_id = ?";
+query = "SELECT user_reviews.review, users.lastname, users.firstname FROM user_reviews, users WHERE user_id = uname AND school_id = ?";
 statement = connection.prepareStatement(query);
 statement.setString(1, school_id);
 
@@ -86,15 +83,16 @@ finally{
 		
 		<%
 		if(!(rs.next())){
-			out.print("No reviews for" + fullname + " yet. Help us out by adding out!<br><br>");
+			out.print("No reviews for " + fullname + " yet. Help us out by adding out!<br><br>");
 		}else{
 			String review = "";
 			String userid  ="";
 					
 			while(rs.next()){
 				review = rs.getString("review");
-				userid = rs.getString("user_id");
-				out.print(review + "<br>" + userid + "<br><br>");
+				String fname = rs.getString("firstname");
+				String lname = rs.getString("lastname");
+				out.print(review + "<br>" + fname +" "+ lname + "<br><br>");
 			}
 		}
 		
@@ -117,9 +115,8 @@ finally{
                             <textarea name="review" rows=10 cols=60 wrap="physical" autofocus="on" > 
                             </textarea>
                             <br><br>
-                            Your name: <input type="text" name="name" />
-                            <br><br>
                             <input type="submit" value="Add review" />
+                        </form>
                     </td>
                 </tr>
             </tbody>

@@ -1,5 +1,18 @@
+<%!
+public static String sanitize(String s) {
+	  
+    s = s.replaceAll("(?i)<script.*?>.*?</script.*?>","");   // case 1 <script> are removed
+    s = s.replaceAll("(?i)<.*?javascript:.*?>.*?</.*?>",""); // case 2 javascript: call are removed
+    s = s.replaceAll("(?i)<.*?\\s+on.*?>.*?</.*?>","");     // case 3 remove on* attributes like onLoad or onClick
+    s = s.replaceAll("[<>{}\\[\\];\\&]",""); // case 4 remove malicous chars. May be overkill...
+    // s = s.replaceAll("j", ""); test
+    return s;
+}
+%>
+
 <% 
 String type = (String)session.getAttribute("type");
+String uname = (String)session.getAttribute("uname");
 
 Boolean redirect = true;
 
@@ -20,11 +33,9 @@ if (redirect){
 <%@page import="javax.sql.DataSource"%>
 <%@page import="javax.naming.InitialContext"%>
 
-<% 
-
+ <%
 String school_id = request.getParameter("school_id");
 String review = request.getParameter("review");
-String name = request.getParameter("name");
 
 
 InitialContext ctx = new InitialContext();
@@ -40,7 +51,8 @@ PreparedStatement statement = connection.prepareStatement(query);
 statement.setString(1, school_id);
 
 try{
-	statement.executeQuery();
+	ResultSet rs2 = statement.executeQuery();
+	if(!rs2.next()) response.sendRedirect("index.jsp");
 }
 catch(Exception e){
 	if(connection != null){
@@ -57,9 +69,10 @@ connection = ds.getConnection();
 
 query = "INSERT INTO user_reviews VALUES (?, ?, ?)";
 statement = connection.prepareStatement(query);
-statement.setString(1, school_id);
-statement.setString(2, name);
-statement.setString(3, review);
+statement.setString(1, sanitize(school_id));
+statement.setString(2, uname);
+statement.setString(3, sanitize(review));
+>>>>>>> de240cf284ae75d29f98989631418396f4f1ec5d
 try {
 	statement.executeUpdate();
 }
@@ -79,14 +92,14 @@ finally{
 <html>
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-        <meta http-equiv="refresh" content="5;url=index.jsp"> 
+        <meta http-equiv="refresh" content="5;url=school_reviews.jsp?school_id=<%out.print(school_id); %>">
         <link rel="stylesheet" type="text/css" href="lutstyle.css">
         <title>Review added!</title>
     </head>
     <body>
-        <h1>Thanks ${param.name}!</h1>
+        <h1>Thanks <%out.print(uname); %>!</h1>
         Your contribution is appreciated.<br>
-        You will be redirected to the LUT2.0 main page in a few seconds.
+        You will be redirected to the LUT3.0 main page in a few seconds.
     </tr>
 </body>
 </html>

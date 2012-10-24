@@ -21,6 +21,9 @@
 	// Get and validate required params (both get and post)
 	String uname = request.getParameter("uname");
 	String key = request.getParameter("key");
+	if(uname == null || key == null) {
+		pageContext.forward("errorpage.jsp");
+	}
 	boolean unameerror = Pattern.compile("[^a-z0-9]", Pattern.CASE_INSENSITIVE).matcher(uname).find();
 	boolean keyerror = Pattern.compile("[^a-z0-9-]", Pattern.CASE_INSENSITIVE).matcher(key).find();
 	boolean pwderror = false;
@@ -68,7 +71,7 @@
 			// input validation
 			String pwd = request.getParameter("pwd");
 			String pwdconfirm = request.getParameter("pwdconfirm");
-			pwderror = Pattern.compile("[^a-z0-9]", Pattern.CASE_INSENSITIVE).matcher(pwd).find();
+			pwderror = Pattern.compile("[^a-z0-9]", Pattern.CASE_INSENSITIVE).matcher(pwd).find() || pwd.length() < 2 || pwd.length() > 255;
 			pwdconfirmerror = !pwd.equals(pwdconfirm);
 			if(!isRobot && !pwderror && ! pwdconfirmerror) {
 			    //hashing

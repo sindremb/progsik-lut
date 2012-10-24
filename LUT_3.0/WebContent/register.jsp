@@ -42,12 +42,12 @@
 		String pwdconfirm = request.getParameter("pwdconfirm");
 		String fname = request.getParameter("fname");
 		String lname = request.getParameter("lname");
-		unameerror = Pattern.compile("[^.{4,16}a-z0-9]", Pattern.CASE_INSENSITIVE).matcher(uname).find();
-		emailerror = Pattern.compile("[^a-z0-9._&@^a-z0-9.]", Pattern.CASE_INSENSITIVE).matcher(email).find();
-		pwderror = Pattern.compile("[^a-z0-9]", Pattern.CASE_INSENSITIVE).matcher(pwd).find();
+		unameerror = Pattern.compile("[^.{4,16}a-z0-9]", Pattern.CASE_INSENSITIVE).matcher(uname).find() || uname.length() < 3 || uname.length() > 15;
+		emailerror = Pattern.compile("[^a-z0-9._&@^a-z0-9.]", Pattern.CASE_INSENSITIVE).matcher(email).find() || email.length() < 5 || email.length() > 255;
+		pwderror = Pattern.compile("[^a-z0-9]", Pattern.CASE_INSENSITIVE).matcher(pwd).find() || pwd.length() < 3 || pwd.length() > 255;
 		pwdconfirmerror = !pwd.equals(pwdconfirm);
-		fnameerror = Pattern.compile("[^a-z0-9Ã¸Ã¦Ã¥]", Pattern.CASE_INSENSITIVE).matcher(fname).find();
-		lnameerror = Pattern.compile("[^a-z0-9Ã¸Ã¦Ã¥]", Pattern.CASE_INSENSITIVE).matcher(lname).find();
+		fnameerror = Pattern.compile("[^a-z0-9Ã¸Ã¦Ã¥]", Pattern.CASE_INSENSITIVE).matcher(fname).find() || fname.length() < 2 || fname.length() > 255;
+		lnameerror = Pattern.compile("[^a-z0-9Ã¸Ã¦Ã¥]", Pattern.CASE_INSENSITIVE).matcher(lname).find() || lname.length() < 2 || lname.length() > 255;
 		if(!isRobot && !unameerror && !emailerror && !pwderror && ! pwdconfirmerror && !fnameerror && !lnameerror) {
 			Connection connection = null;
 			try {
