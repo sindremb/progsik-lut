@@ -1,5 +1,6 @@
 <% 
 String type = (String)session.getAttribute("type");
+String uname = (String)session.getAttribute("uname");
 
 Boolean redirect = true;
 
@@ -25,6 +26,7 @@ if (redirect){
 <%
 
 String school_id = request.getParameter("school_id");
+if(school_id == null || school_id.length() == 0) pageContext.forward("errorpage.jsp");
 
 InitialContext ctx = new InitialContext();
 DataSource ds = (DataSource) ctx.lookup("jdbc/lut2");
@@ -43,15 +45,25 @@ try{
 	rs = statement.executeQuery();
 	if (!rs.next()){
 		response.sendRedirect("index.jsp");
+		return;
 	}
 }catch (Exception e){
-	if (connection != null){
-		connection.close();
-	}
-	response.sendRedirect("errorpage.jsp");
+	//response.sendRedirect("errorpage.jsp");
 }
 String fullname = rs.getString("full_name");
 String shortname = rs.getString("short_name");
+
+boolean reviewed = false;
+try{
+	connection = ds.getConnection();
+	statement = connection.prepareStatement("SELECT * FROM user_reviews WHERE user_id = ? AND school_id = ?");
+	statement.setString(1,uname);
+	statement.setString(2,school_id);
+	rs = statement.executeQuery();
+	if(rs.next()) reviewed = true;
+}catch (Exception e){
+	pageContext.forward("errorpage.jsp");
+}
 
 query = "SELECT user_reviews.review, users.lastname, users.firstname FROM user_reviews, users WHERE user_id = uname AND school_id = ?";
 statement = connection.prepareStatement(query);
@@ -60,7 +72,7 @@ statement.setString(1, school_id);
 try{
 	rs = statement.executeQuery();
 }catch (Exception e){
-	response.sendRedirect("errorpage.jsp");
+	pageContext.forward("errorpage.jsp");
 }
 finally{
 	if (connection != null){
@@ -109,14 +121,16 @@ finally{
             </thead>
             <tbody>
                 <tr>
-                    <td>
+                    <td><% if(!reviewed) { %>
                         <form action="add_review.jsp"  method="post">
                             <input type="hidden" name="school_id" value='<%out.print(school_id); %>' />
-                            <textarea name="review" rows=10 cols=60 wrap="physical" autofocus="on" > 
-                            </textarea>
+                            <textarea name="review" rows=10 cols=60 wrap="physical" autofocus="on" ></textarea>
                             <br><br>
                             <input type="submit" value="Add review" />
                         </form>
+                        <% } else { %>
+                        You have already reviewed this school
+                        <% } %>
                     </td>
                 </tr>
             </tbody>
