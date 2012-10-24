@@ -36,7 +36,7 @@ String newtype = request.getParameter("newtype");
 String uname = request.getParameter("uname");
 
 InitialContext ctx = new InitialContext();
-DataSource ds = (DataSource) ctx.lookup("jdbc/lut2");
+DataSource ds = (DataSource) ctx.lookup("jdbc/lut2write");
 Connection connection = ds.getConnection();
 
 

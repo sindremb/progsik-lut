@@ -11,6 +11,7 @@ if (type == null){
 
 if (redirect){
 	response.sendRedirect("login.jsp");
+	return;
 }
 
 %>
@@ -24,7 +25,7 @@ if (redirect){
 
 <%
 InitialContext ctx = new InitialContext();
-DataSource ds = (DataSource) ctx.lookup("jdbc/lut2");
+DataSource ds = (DataSource) ctx.lookup("jdbc/lut2read");
 Connection connection = ds.getConnection();
 
 if (connection == null)
