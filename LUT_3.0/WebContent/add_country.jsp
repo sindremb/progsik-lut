@@ -85,8 +85,13 @@ if (redirect){
 	    try{
 	    	rs = statement.executeQuery();
 	    }catch(Exception e){
+	    	
+	    	if (connection != null){
+	    		connection.close();
+	    	}
 	    	response.sendRedirect("lutadmin.jsp");
 	    }
+	    
 	    
 	   	if(!rs.next()){
 	   		query = "insert into country values (?, ?)";
@@ -97,6 +102,9 @@ if (redirect){
 	    		statement.executeUpdate();
 	    	}
 	    	catch(Exception e){
+	    		if (connection != null){
+		    		connection.close();
+		    	}
 	    		response.sendRedirect("lutadmin.jsp");
 	    	}
 	    	

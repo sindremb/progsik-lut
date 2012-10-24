@@ -112,5 +112,14 @@ connection.close();
         out.print("</table>");
         %>
 
+        <form action="index.jsp" method="post">
+        	<input type="submit" value = "Back to index">
+        </form>
+		<form action="logout.jsp" method="post">
+        	<input type="submit" value = "Log out">
+        </form>
+        
+        
+
     </body>
 </html>
