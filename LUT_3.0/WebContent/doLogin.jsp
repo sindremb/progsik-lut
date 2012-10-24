@@ -10,6 +10,13 @@
 <%@page import="java.security.MessageDigest"%>
 
 
+<% // not able to login with GET. avoid null pointer exception if users try to refresh doLogin.jsp when failing to login
+if ("Get".equalsIgnoreCase(request.getMethod())) {
+	response.sendRedirect("login.jsp");
+	return;
+}
+
+%>
 
 <%! 
 public static String sanitize(String s) {
