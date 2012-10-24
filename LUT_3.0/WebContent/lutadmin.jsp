@@ -7,12 +7,14 @@ Boolean redirect = true;
 
 if (type == null){
 	redirect = true;
-}else if (type.equals("1")){
+}else if (type.equals("1")
+		){
 	redirect = false;
 }
 
 if (redirect){
 	response.sendRedirect("login.jsp");
+	return;
 }
 
 %>
@@ -38,7 +40,12 @@ if (redirect){
         		<tr>
         			<td><a href = "add_country.jsp">Add a country</a></td>
         		</tr>
+        		<tr>
 					<td><a href = "add_school.jsp">Add a school</a></td>
+				</tr>
+				<tr>
+					<td><a href = "usermanagament.jsp">Add a school</a></td>
+				</tr>
         	</tbody>
         </table>
     </body>
