@@ -10,6 +10,7 @@
 <%@page import="javax.servlet.http.*,javax.servlet.*" %>
 <%@page import="java.util.UUID" %>
 <%@page import="java.security.MessageDigest"%>
+<%@page import="sun.misc.BASE64Encoder"%>
 <%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
 <%@taglib prefix="sql" uri="http://java.sun.com/jsp/jstl/sql"%>
 
@@ -76,9 +77,10 @@
 		            emailunique = false;
 		        }
 		        if(unameunique && emailunique) {
-		        	connection.close()
+		        	connection.close();
 		        	ds = (DataSource) ctx.lookup("jdbc/lut2write");
 		        	connection = ds.getConnection();
+		        	connection.setAutoCommit(false);
 		        	// Prepeare insert user statement
 				    PreparedStatement createUser = connection.prepareStatement(
 				    		"INSERT INTO users (uname,email,firstname,lastname,type,active,salt,pw) VALUES(?,?,?,?,?,?,?,?)");
@@ -88,6 +90,8 @@
 					String salt = UUID.randomUUID().toString();
 					digest.update(salt.getBytes("UTF-8"));
 					String pwhash = new String(digest.digest(pwd.getBytes("UTF-8")), "UTF-8");
+					BASE64Encoder encoder = new BASE64Encoder();
+					String pwhashencoded = encoder.encodeBuffer(pwhash.getBytes());
 			        
 			        // Set the value
 			        createUser.setString(1, uname);
@@ -97,7 +101,7 @@
 			        createUser.setInt(5, 2);
 			        createUser.setInt(6, 0);
 			        createUser.setString(7, salt);
-			        createUser.setString(8, pwhash);
+			        createUser.setString(8, pwhashencoded);
 			        // Insert the row
 			        createUser.executeUpdate();
 			        // Create activate key for user
@@ -218,7 +222,7 @@
 	                    <td>Username</td><td>
 	                    	<input type='text' name='uname' value='${param.uname}' />
 	                    	<% if(unameerror) { %>
-	                    		<div class='errormessage'>Username can only consist of letters [a-z] and digits and have a length between 5 and 15</div>
+	                    		<div class='errormessage'>Username can only consist of letters [a-z] and digits and have a length of at least 3 characters</div>
 	                    	<% } if(!unameunique) { %>
                     			<div class='errormessage'>A user with the given username already exists</div>
                     		<% } %>

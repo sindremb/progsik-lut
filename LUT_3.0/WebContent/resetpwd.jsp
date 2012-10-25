@@ -9,6 +9,7 @@
 <%@page import="javax.naming.InitialContext"%>
 <%@page import="java.util.*" %>
 <%@page import="java.security.MessageDigest"%>
+<%@page import="sun.misc.BASE64Encoder"%>
 <%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
 <%@taglib prefix="sql" uri="http://java.sun.com/jsp/jstl/sql"%>
 
@@ -80,11 +81,13 @@
 				String salt = UUID.randomUUID().toString();
 				digest.update(salt.getBytes("UTF-8"));
 				String pwhash = new String(digest.digest(pwd.getBytes("UTF-8")), "UTF-8");
+				BASE64Encoder encoder = new BASE64Encoder();
+				String encodedpwhash = encoder.encodeBuffer(pwhash.getBytes());
 		        // Update pwdhash (and salt)
 		        PreparedStatement resetpwd = connection.prepareStatement(
 			    		"UPDATE users SET salt = ? , pw = ? WHERE uname = ?");
 		        resetpwd.setString(1, salt);
-		        resetpwd.setString(2, pwhash);
+		        resetpwd.setString(2, encodedpwhash);
 		        resetpwd.setString(3, uname);
 		        resetpwd.executeUpdate();
 		     // Remove old reset key for user

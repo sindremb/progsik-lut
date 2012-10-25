@@ -8,7 +8,8 @@
 <%@page import="javax.sql.DataSource"%>
 <%@page import="javax.naming.InitialContext"%>
 <%@page import="java.security.MessageDigest"%>
-
+<%@page import="sun.misc.BASE64Decoder"%>
+<%@page import="sun.misc.BASE64Encoder"%>
 
 <% // not able to login with GET. avoid null pointer exception if users try to refresh doLogin.jsp when failing to login
 if ("Get".equalsIgnoreCase(request.getMethod())) {
@@ -165,7 +166,9 @@ public static String sanitize(String s) {
 		//System.out.println("uname="+uname+" pw="+pw);
 		rs=statement.executeQuery();
 		if(rs.next() && !isRobot){
-			String storedhash = rs.getString("pw");
+			String storedhashencoded = rs.getString("pw"); // in base 64 encoding - hash may create symbols unsafe for sql-statements
+			BASE64Decoder decoder = new BASE64Decoder();
+			String storedhash = new String(decoder.decodeBuffer(storedhashencoded)); // gets the actual hash
 			String salt = rs.getString("salt");
 			String type = rs.getString("type");
 			boolean active = rs.getInt("active") == 1;
@@ -174,17 +177,31 @@ public static String sanitize(String s) {
 			digest.reset();
 			digest.update(salt.getBytes("UTF-8"));
 			String pwhash = new String(digest.digest(pw.getBytes("UTF-8")), "UTF-8");
-			if(storedhash.equals(pwhash) && active) {
+			// pwhash and storedhash may look the same, but they arent apparently...
+			BASE64Encoder encoder = new BASE64Encoder();
+			String encodedpwdhash = encoder.encodeBuffer(pwhash.getBytes());
+			String lolpwhash = new String(decoder.decodeBuffer(encodedpwdhash)); // lolhaX
+			/* out.print(pwhash);
+			out.print(" = <br />"+storedhash+" ?");
+			out.print("<br>" + storedhash.equals(lolpwhash));
+			for(int i = 0; i < lolpwhash.length();i++){
+				out.print(lolpwhash.charAt(i));
+				out.print(" = "+storedhash.charAt(i)+" ?");
+				out.print("<br />"+ (lolpwhash.charAt(i) == storedhash.charAt(i))+"<br />");
+			} */
+			if(storedhash.equals(lolpwhash) && active) {
 				if ("1".equals(type)) {
 					session.setAttribute("uname",uname);
 					session.setAttribute("type", "1");
 					connection.close();
 					response.sendRedirect("lutadmin.jsp");
+					return;
 				} else if ("2".equals(type)) {
 					session.setAttribute("uname",uname);
 					session.setAttribute("type", "2");
 					connection.close();
 					response.sendRedirect("index.jsp");
+					return;
 				}
 			}
 		}
