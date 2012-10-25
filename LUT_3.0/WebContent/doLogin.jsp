@@ -226,7 +226,7 @@ public static String sanitize(String s) {
 				<!--  
 				<%  
 				String clock = request.getParameter( "clock" );  
-					if( clock == null ) clock = "10";  
+					if( clock == null ) clock = "12";  
 				%>  
 				var timeout = <%=clock%>;  
 				function timer()  {  
