@@ -163,9 +163,18 @@ public static String sanitize(String s) {
 		String query = "SELECT * FROM users WHERE uname = ?";
 		PreparedStatement statement = connection.prepareStatement(query);
 	   	statement.setString(1, uname);
-		ResultSet rs;
+		ResultSet rs = null;
 		//System.out.println("uname="+uname+" pw="+pw);
-		rs=statement.executeQuery();
+		
+		try{
+			rs = statement.executeQuery();
+		}catch (Exception e){
+			if (connection != null){
+				connection.close();
+			}
+			response.sendRedirect("errorpage.jsp");
+			return;
+		}
 		if(rs.next() && !isRobot){
 			String storedhashencoded = rs.getString("pw"); // in base 64 encoding - hash may create symbols unsafe for sql-statements
 			BASE64Decoder decoder = new BASE64Decoder();

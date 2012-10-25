@@ -116,6 +116,7 @@ public static String sanitize(String s) {
 			</tr>
 		</tbody>
 </form>
+</table>
 
 <%	
 		
@@ -187,9 +188,12 @@ if (!(fullname.equals(""))&& !(shortname.equals("")) && !(place.equals("")) && !
 	   	connection.close();
 	   	
     }
-	out.print("<a href = 'lutadmin.jsp'>Back to admin page</a>");	
 %>
-<form action="logout.jsp" method="post">
+		<form action="lutadmin.jsp" method="post">
+        	<input type="submit" value = "Back to admin page">
+        </form>
+		
+		<form action="logout.jsp" method="post">
         	<input type="submit" value = "Log out">
         </form>
         
