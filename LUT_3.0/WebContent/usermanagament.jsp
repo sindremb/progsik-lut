@@ -1,11 +1,11 @@
 <% 
-String type = (String)session.getAttribute("type");
+String utype = (String)session.getAttribute("type");
 
 Boolean redirect = true;
 
-if (type == null){
+if (utype == null){
 	redirect = true;
-}else if (type.equals("1")){
+}else if (utype.equals("1")){
 	redirect = false;
 }
 
@@ -25,7 +25,6 @@ if (redirect){
 <%@page import="javax.sql.DataSource"%>
 <%@page import="javax.naming.InitialContext"%>
 <%
-out.print(session.getAttribute("uname"));
 
 InitialContext ctx = new InitialContext();
 DataSource ds = (DataSource) ctx.lookup("jdbc/lut2read");
@@ -68,8 +67,10 @@ finally{
         <title>Manage the users</title>
     </head>
     <body>
+    <h1>
     	Here you can make a user admin or delete them!
-    	<table>
+    	</h1>
+    	<p>Please note that if you demote yourself you <strong>will</strong> lose access to this page</p><table>
     		<tr>
     			<td><strong>User</strong></td>
     			<td><strong>Type</strong></td>
@@ -105,23 +106,25 @@ finally{
 					out.print("<td>" + typestring + "</td>");
 					out.print("<td>" + activestring + "</td>");
 					out.print("<td><form action = 'changeusertype.jsp' method = post>");
-					out.print("<input type = 'hidden' name = 'newtype' value = '" + newtype + "'/>");
-					out.print("<input type = 'hidden' name = 'uname' value = '" + username + "'/>");
+					out.print("<input type = 'hidden' name = 'newtype' value = '" + newtype + "' />");
+					out.print("<input type = 'hidden' name = 'uname' value = '" + username + "' />");
 					out.print("<input type = 'submit' value = '" + newtypestring +  "' /></td></form>");
 					out.print("<td><form action = 'deleteuser.jsp' method = post>");
-					out.print("<input type = 'hidden' name = 'delete' value = 'true'/>");
-					out.print("<input type = 'hidden' name = 'uname' value = '" + username + "'/>");
+					out.print("<input type = 'hidden' name = 'delete' value = 'true' />");
+					out.print("<input type = 'hidden' name = 'uname' value = '" + username + "' />");
 					out.print("<input type = 'submit' value = 'Delete user' /></td></form>");
 					out.print("</tr>");
 					
 				}
     		%>
     	</table>
-    	<% out.print("<a href = 'lutadmin.jsp'>Back to admin page</a>");%>
-    
-    </body>
+        	<form action="lutadmin.jsp" method="get">
+        	<input type="submit" value = "Go to admin page">
+        </form>
     <form action="logout.jsp" method="post">
         	<input type="submit" value = "Log out">
         </form>
+    
+    </body>
         
 </html>

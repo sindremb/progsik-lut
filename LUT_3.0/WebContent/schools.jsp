@@ -120,6 +120,15 @@ finally{
         <form action="index.jsp" method="post">
         	<input type="submit" value = "Back to index">
         </form>
+        <%
+        if (type.equals("1")){
+        	%>
+        	<form action="lutadmin.jsp" method="post">
+        	<input type="submit" value = "Go to admin page">
+        </form>
+        	 <%
+        }
+        %>
 		<form action="logout.jsp" method="post">
         	<input type="submit" value = "Log out">
         </form>

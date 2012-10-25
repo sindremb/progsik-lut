@@ -44,11 +44,14 @@ if (redirect){
 					<td><a href = "add_school.jsp">Add a school</a></td>
 				</tr>
 				<tr>
-					<td><a href = "usermanagament.jsp">Add a school</a></td>
+					<td><a href = "usermanagament.jsp">Manage Users</a></td>
 				</tr>
         	</tbody>
         </table>
-        <form action="logout.jsp" method="post">
+        <form action="index.jsp" method="get">
+        	<input type="submit" value = "Go to index">
+        </form>
+        <form action="logout.jsp" method="get">
         	<input type="submit" value = "Log out">
         </form>
         

@@ -106,9 +106,19 @@ session.setMaxInactiveInterval(900 * 1); //automatic logout after 900 seconds :P
         <br>
         <br>
         <br>
+        <%
+        if (type.equals("1")){
+        	%>
+        	<form action="lutadmin.jsp" method="post">
+        	<input type="submit" value = "Go to admin page">
+        </form>
+        	 <%
+        }
+        %>
         <form action="logout.jsp" method="post">
         	<input type="submit" value = "Log out">
         </form>
+        
         
 
     </body>

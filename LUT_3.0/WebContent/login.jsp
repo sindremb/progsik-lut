@@ -40,7 +40,7 @@
 						</tr>
 				  	</tbody>
 				</table>
-				<p><input type="submit" value="login" name="login"></p>
+				<p><input type="submit" value="Login" name="login"></p>
 				
     		</form>	
     	
