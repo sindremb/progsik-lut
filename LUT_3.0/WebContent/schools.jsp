@@ -1,16 +1,29 @@
 <% 
-String type = (String)session.getAttribute("type");
+String loginuser = (String)session.getAttribute("uname");
+int type = -1; 
 
-Boolean redirect = true;
-
-if (type == null){
-	redirect = true;
-}else if (type.equals("1") || type.equals("2")){
-	redirect = false;
-}
-
-if (redirect){
+Connection logincon = null;
+try {
+	InitialContext loginctx = new InitialContext();
+	DataSource loginds = (DataSource) loginctx.lookup("jdbc/lut2read");
+	logincon = loginds.getConnection();
+	
+	PreparedStatement loginstatement = logincon.prepareStatement("SELECT type FROM users WHERE uname=?");
+	loginstatement.setString(1,loginuser);
+	ResultSet loginrs = loginstatement.executeQuery();
+	if(!loginrs.next()) {
+		response.sendRedirect("login.jsp");
+		return;
+	}
+	type = loginrs.getInt("type");
+	if(type != 1 && type != 2) { // 1 for admin, 2 for regular user
+		response.sendRedirect("login.jsp");
+		return;
+	}
+	logincon.close();
+} catch(Exception e) {
 	response.sendRedirect("login.jsp");
+	if(logincon != null) logincon.close();
 	return;
 }
 
@@ -114,14 +127,14 @@ finally{
         	out.print("<input type='submit' name='Read reviews' value='Read reviews' />");
         	out.print("</form></td></tr></tbody>");
         }
-        out.print("</table>");
         %>
+        </table>
 
         <form action="index.jsp" method="post">
         	<input type="submit" value = "Back to index">
         </form>
         <%
-        if (type.equals("1")){
+        if (type == 1){
         	%>
         	<form action="lutadmin.jsp" method="post">
         	<input type="submit" value = "Go to admin page">
