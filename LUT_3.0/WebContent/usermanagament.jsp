@@ -1,16 +1,29 @@
 <% 
-String utype = (String)session.getAttribute("type");
+String loginuser = (String)session.getAttribute("uname");
+int utype = -1; 
 
-Boolean redirect = true;
-
-if (utype == null){
-	redirect = true;
-}else if (utype.equals("1")){
-	redirect = false;
-}
-
-if (redirect){
+Connection logincon = null;
+try {
+	InitialContext loginctx = new InitialContext();
+	DataSource loginds = (DataSource) loginctx.lookup("jdbc/lut2read");
+	logincon = loginds.getConnection();
+	
+	PreparedStatement loginstatement = logincon.prepareStatement("SELECT type FROM users WHERE uname=?");
+	loginstatement.setString(1,loginuser);
+	ResultSet loginrs = loginstatement.executeQuery();
+	if(!loginrs.next()) {
+		response.sendRedirect("login.jsp");
+		return;
+	}
+	utype = loginrs.getInt("type");
+	if(utype != 1) { // 1 for admin, 2 for regular user
+		response.sendRedirect("login.jsp");
+		return;
+	}
+	logincon.close();
+} catch(Exception e) {
 	response.sendRedirect("login.jsp");
+	if(logincon != null) logincon.close();
 	return;
 }
 %>

@@ -191,24 +191,14 @@ public static String sanitize(String s) {
 			BASE64Encoder encoder = new BASE64Encoder();
 			String encodedpwdhash = encoder.encodeBuffer(pwhash.getBytes());
 			String lolpwhash = new String(decoder.decodeBuffer(encodedpwdhash)); // lolhaX
-			/* out.print(pwhash);
-			out.print(" = <br />"+storedhash+" ?");
-			out.print("<br>" + storedhash.equals(lolpwhash));
-			for(int i = 0; i < lolpwhash.length();i++){
-				out.print(lolpwhash.charAt(i));
-				out.print(" = "+storedhash.charAt(i)+" ?");
-				out.print("<br />"+ (lolpwhash.charAt(i) == storedhash.charAt(i))+"<br />");
-			} */
 			if(storedhash.equals(lolpwhash) && active) {
 				if ("1".equals(type)) {
 					session.setAttribute("uname",uname);
-					session.setAttribute("type", "1");
 					connection.close();
 					response.sendRedirect("lutadmin.jsp");
 					return;
 				} else if ("2".equals(type)) {
 					session.setAttribute("uname",uname);
-					session.setAttribute("type", "2");
 					connection.close();
 					response.sendRedirect("index.jsp");
 					return;
