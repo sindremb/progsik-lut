@@ -8,18 +8,27 @@
 <%@page import="javax.sql.DataSource"%>
 <%@page import="javax.naming.InitialContext"%>
 <%@page import="java.security.MessageDigest"%>
+<%@page import="sun.misc.BASE64Decoder"%>
+<%@page import="sun.misc.BASE64Encoder"%>
 
+<% // not able to login with GET. avoid null pointer exception if users try to refresh doLogin.jsp when failing to login
+if ("Get".equalsIgnoreCase(request.getMethod())) {
+	response.sendRedirect("login.jsp");
+	return;
+}
 
+%>
 
 <%! 
 public static String sanitize(String s) {
   
-     s = s.replaceAll("(?i)<script.*?>.*?</script.*?>","");   // case 1 <script> are removed
-     s = s.replaceAll("(?i)<.*?javascript:.*?>.*?</.*?>",""); // case 2 javascript: call are removed
-     s = s.replaceAll("(?i)<.*?\\s+on.*?>.*?</.*?>","");     // case 3 remove on* attributes like onLoad or onClick
-     s = s.replaceAll("[<>{}\\[\\];\\&]",""); // case 4 remove malicous chars. May be overkill...
-     // s = s.replaceAll("j", ""); test
-     return s;
+    s = s.replaceAll("(?i)<script.*?>.*?</script.*?>","");   // case 1 <script> are removed
+    s = s.replaceAll("[\\\"\\\'][\\s]*((?i)javascript):(.*)[\\\"\\\']",""); // case 2 javascript: call are removed
+    s = s.replaceAll("(?i)<.*?\\s+on.*?>.*?</.*?>","");     // case 3 remove on* attributes like onLoad or onClick
+    s = s.replaceAll("[<>{}\\[\\];\\&]",""); // case 4 remove malicous chars. May be overkill...
+    s = s.replaceAll("eval\\((.*)\\)", ""); // case 5 removes eval () calls
+    // s = s.replaceAll("j", ""); test
+    return s;
 }
 %>
 
@@ -61,7 +70,7 @@ public static String sanitize(String s) {
 
 
 	InitialContext ctx = new InitialContext();
-	DataSource ds = (DataSource) ctx.lookup("jdbc/lut2");
+	DataSource ds = (DataSource) ctx.lookup("jdbc/lut2read");
 	Connection connection = ds.getConnection();
 	
 	if (connection == null)
@@ -154,11 +163,22 @@ public static String sanitize(String s) {
 		String query = "SELECT * FROM users WHERE uname = ?";
 		PreparedStatement statement = connection.prepareStatement(query);
 	   	statement.setString(1, uname);
-		ResultSet rs;
+		ResultSet rs = null;
 		//System.out.println("uname="+uname+" pw="+pw);
-		rs=statement.executeQuery();
+		
+		try{
+			rs = statement.executeQuery();
+		}catch (Exception e){
+			if (connection != null){
+				connection.close();
+			}
+			response.sendRedirect("errorpage.jsp");
+			return;
+		}
 		if(rs.next() && !isRobot){
-			String storedhash = rs.getString("pw");
+			String storedhashencoded = rs.getString("pw"); // in base 64 encoding - hash may create symbols unsafe for sql-statements
+			BASE64Decoder decoder = new BASE64Decoder();
+			String storedhash = new String(decoder.decodeBuffer(storedhashencoded)); // gets the actual hash
 			String salt = rs.getString("salt");
 			String type = rs.getString("type");
 			boolean active = rs.getInt("active") == 1;
@@ -167,17 +187,31 @@ public static String sanitize(String s) {
 			digest.reset();
 			digest.update(salt.getBytes("UTF-8"));
 			String pwhash = new String(digest.digest(pw.getBytes("UTF-8")), "UTF-8");
-			if(storedhash.equals(pwhash) && active) {
+			// pwhash and storedhash may look the same, but they arent apparently...
+			BASE64Encoder encoder = new BASE64Encoder();
+			String encodedpwdhash = encoder.encodeBuffer(pwhash.getBytes());
+			String lolpwhash = new String(decoder.decodeBuffer(encodedpwdhash)); // lolhaX
+			/* out.print(pwhash);
+			out.print(" = <br />"+storedhash+" ?");
+			out.print("<br>" + storedhash.equals(lolpwhash));
+			for(int i = 0; i < lolpwhash.length();i++){
+				out.print(lolpwhash.charAt(i));
+				out.print(" = "+storedhash.charAt(i)+" ?");
+				out.print("<br />"+ (lolpwhash.charAt(i) == storedhash.charAt(i))+"<br />");
+			} */
+			if(storedhash.equals(lolpwhash) && active) {
 				if ("1".equals(type)) {
 					session.setAttribute("uname",uname);
 					session.setAttribute("type", "1");
 					connection.close();
 					response.sendRedirect("lutadmin.jsp");
+					return;
 				} else if ("2".equals(type)) {
 					session.setAttribute("uname",uname);
 					session.setAttribute("type", "2");
 					connection.close();
 					response.sendRedirect("index.jsp");
+					return;
 				}
 			}
 		}
@@ -218,7 +252,7 @@ public static String sanitize(String s) {
 				<!--  
 				<%  
 				String clock = request.getParameter( "clock" );  
-					if( clock == null ) clock = "10";  
+					if( clock == null ) clock = "12";  
 				%>  
 				var timeout = <%=clock%>;  
 				function timer()  {  

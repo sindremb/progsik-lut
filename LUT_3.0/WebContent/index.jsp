@@ -11,6 +11,7 @@ if (type == null){
 
 if (redirect){
 	response.sendRedirect("login.jsp");
+	return;
 }
 
 %>
@@ -24,7 +25,7 @@ if (redirect){
 
 <%
 InitialContext ctx = new InitialContext();
-DataSource ds = (DataSource) ctx.lookup("jdbc/lut2");
+DataSource ds = (DataSource) ctx.lookup("jdbc/lut2read");
 Connection connection = ds.getConnection();
 
 if (connection == null)
@@ -105,9 +106,19 @@ session.setMaxInactiveInterval(900 * 1); //automatic logout after 900 seconds :P
         <br>
         <br>
         <br>
+        <%
+        if (type.equals("1")){
+        	%>
+        	<form action="lutadmin.jsp" method="post">
+        	<input type="submit" value = "Go to admin page">
+        </form>
+        	 <%
+        }
+        %>
         <form action="logout.jsp" method="post">
         	<input type="submit" value = "Log out">
         </form>
+        
         
 
     </body>

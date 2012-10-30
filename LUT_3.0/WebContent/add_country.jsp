@@ -24,6 +24,19 @@ if (redirect){
 <%@page import="javax.sql.DataSource"%>
 <%@page import="javax.naming.InitialContext"%>
 
+<%! 
+public static String sanitize(String s) {
+  
+    s = s.replaceAll("(?i)<script.*?>.*?</script.*?>","");   // case 1 <script> are removed
+    s = s.replaceAll("[\\\"\\\'][\\s]*((?i)javascript):(.*)[\\\"\\\']",""); // case 2 javascript: call are removed
+    s = s.replaceAll("(?i)<.*?\\s+on.*?>.*?</.*?>","");     // case 3 remove on* attributes like onLoad or onClick
+    s = s.replaceAll("[<>{}\\[\\];\\&]",""); // case 4 remove malicous chars. May be overkill...
+    s = s.replaceAll("eval\\((.*)\\)", ""); // case 5 removes eval () calls
+    // s = s.replaceAll("j", ""); test
+    return s;
+}
+%>
+
 <%@ page language="java" contentType="text/html; charset=ISO-8859-1"
     pageEncoding="ISO-8859-1"%>
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
@@ -57,6 +70,7 @@ if (redirect){
 			</tr>
 		</tbody>
 </form>
+</table>
 
 
 <%	
@@ -66,10 +80,14 @@ if (redirect){
 		fullname = request.getParameter("fullname");
 		shortname = request.getParameter("shortname");
 	}
+	
+	fullname = sanitize(fullname);
+	shortname = sanitize(shortname);
+	
 	if (!(fullname.equals(""))&& !(shortname.equals(""))){
 		
 	    InitialContext ctx = new InitialContext();
-	    DataSource ds = (DataSource) ctx.lookup("jdbc/lut2");
+	    DataSource ds = (DataSource) ctx.lookup("jdbc/lut2write");
 	    Connection connection = ds.getConnection();
 	    
 	    if (connection == null)
@@ -118,8 +136,16 @@ if (redirect){
 		}
 	   	
     }
-	out.print("<a href = 'lutadmin.jsp'>Back to admin page</a>");
+	
 %>
-    
+  	  <form action="lutadmin.jsp" method="post">
+        	<input type="submit" value = "Back to admin page">
+        </form>
+		
+		<form action="logout.jsp" method="post">
+        	<input type="submit" value = "Log out">
+        </form>
+        
+        
 </body>
 </html>

@@ -11,6 +11,7 @@ if (type == null){
 
 if (redirect){
 	response.sendRedirect("login.jsp");
+	return;
 }
 
 %>
@@ -26,7 +27,7 @@ if (redirect){
 String country_full = request.getParameter("country");
 
 InitialContext ctx = new InitialContext();
-DataSource ds = (DataSource) ctx.lookup("jdbc/lut2");
+DataSource ds = (DataSource) ctx.lookup("jdbc/lut2read");
 Connection connection = ds.getConnection();
 
 if (connection == null)
@@ -110,7 +111,7 @@ finally{
         	out.print("<span style='font-size:smaller; font-style:italic;'>zip: "+ zip + "</span></td></tr>" );
         	out.print("<tr><td><form action='school_reviews.jsp'>");
         	out.print("<input type='hidden' name='school_id' value='" + school_id + "' />");
-        	out.print("<input type='submit' name='Read reviews' />");
+        	out.print("<input type='submit' name='Read reviews' value='Read reviews' />");
         	out.print("</form></td></tr></tbody>");
         }
         out.print("</table>");
@@ -119,6 +120,15 @@ finally{
         <form action="index.jsp" method="post">
         	<input type="submit" value = "Back to index">
         </form>
+        <%
+        if (type.equals("1")){
+        	%>
+        	<form action="lutadmin.jsp" method="post">
+        	<input type="submit" value = "Go to admin page">
+        </form>
+        	 <%
+        }
+        %>
 		<form action="logout.jsp" method="post">
         	<input type="submit" value = "Log out">
         </form>

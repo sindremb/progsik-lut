@@ -49,7 +49,11 @@ try{
 		return;
 	}
 }catch (Exception e){
-	//response.sendRedirect("errorpage.jsp");
+	if (connection != null){
+		connection.close();
+	}
+	response.sendRedirect("errorpage.jsp");
+	return;
 }
 String fullname = rs.getString("full_name");
 String shortname = rs.getString("short_name");
@@ -101,12 +105,12 @@ finally{
 			String review = "";
 			String userid  ="";
 					
-			while(rs.next()){
+			do {
 				review = rs.getString("review");
 				String fname = rs.getString("firstname");
 				String lname = rs.getString("lastname");
 				out.print(review + "<br>" + fname +" "+ lname + "<br><br>");
-			}
+			} while(rs.next());
 		}
 		
 		%>
@@ -140,6 +144,15 @@ finally{
         <form action="index.jsp" method="post">
         	<input type="submit" value = "Back to index">
         </form>
+        <%
+        if (type.equals("1")){
+        	%>
+        	<form action="lutadmin.jsp" method="post">
+        	<input type="submit" value = "Go to admin page">
+        </form>
+        	 <%
+        }
+        %>
 		<form action="logout.jsp" method="post">
         	<input type="submit" value = "Log out">
         </form>

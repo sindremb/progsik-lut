@@ -1,25 +1,26 @@
 <%@ page language="java" contentType="text/html; charset=ISO-8859-1"
     pageEncoding="ISO-8859-1"%>
-<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
-<html>
-<head>
-<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
-<title>Was this the correct answer? Nooooooo</title>
-</head>
-<body>
 
 <%! 
 public static String sanitize(String s) {
   
-     s = s.replaceAll("(?i)<script.*?>.*?</script.*?>","");   // case 1 <script> are removed
-     s = s.replaceAll("(?i)<.*?javascript:.*?>.*?</.*?>",""); // case 2 javascript: call are removed
-     s = s.replaceAll("(?i)<.*?\\s+on.*?>.*?</.*?>","");     // case 3 remove on* attributes like onLoad or onClick
-     s = s.replaceAll("[<>{}\\[\\];\\&]",""); // case 4 remove malicous chars. May be overkill...
-     // s = s.replaceAll("j", ""); test
-     return s;
+    s = s.replaceAll("(?i)<script.*?>.*?</script.*?>","");   // case 1 <script> are removed
+    s = s.replaceAll("[\\\"\\\'][\\s]*((?i)javascript):(.*)[\\\"\\\']",""); // case 2 javascript: call are removed
+    s = s.replaceAll("(?i)<.*?\\s+on.*?>.*?</.*?>","");     // case 3 remove on* attributes like onLoad or onClick
+    s = s.replaceAll("[<>{}\\[\\];\\&]",""); // case 4 remove malicous chars. May be overkill...
+    s = s.replaceAll("eval\\((.*)\\)", ""); // case 5 removes eval () calls
+    // s = s.replaceAll("j", ""); test
+    return s;
 }
 %>
 
+<% // not able to get here  with GET. avoid null pointer exception if users try to refresh check.jsp when failing to login
+if ("Get".equalsIgnoreCase(request.getMethod())) {
+	response.sendRedirect("login.jsp");
+	return;
+}
+
+%>
 
 <%
 String answer = "";
@@ -31,13 +32,15 @@ if (answer.equals("A watermelon")) {
 
 else {
 	%>
-	<html>
-	<head>
-			<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-			<link rel="stylesheet" type="text/css" href="lutstyle.css">
-			 <title>Seriously?</title>
-	</head>
-	<body>
+	<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+		<html>
+		<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+		<link rel="stylesheet" type="text/css" href="lutstyle.css">
+		<title>Was this the correct answer? Nooooooo</title>
+		</head>
+		<body>
+	
         <h3>Seriously is your answer <strong>"<%= answer %>"</strong> ?</h3>
         <br>
         <br>
@@ -58,7 +61,7 @@ else {
 						else  {  
 							document.forma.clock.value = "Time over";
 							window.location.href = "http://www.sometimesredsometimesblue.com/"; 
-							///disable submit-button etc  
+
 						}  
 					}  
 					//-->  
@@ -80,7 +83,7 @@ else {
 			
 	}
 	%>
-	</body>
+	
 
 
 </html>

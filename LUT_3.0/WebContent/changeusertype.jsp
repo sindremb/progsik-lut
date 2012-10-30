@@ -1,5 +1,6 @@
 <% 
 String type = (String)session.getAttribute("type");
+String currentuname = (String)session.getAttribute("uname");
 
 Boolean redirect = true;
 
@@ -36,7 +37,7 @@ String newtype = request.getParameter("newtype");
 String uname = request.getParameter("uname");
 
 InitialContext ctx = new InitialContext();
-DataSource ds = (DataSource) ctx.lookup("jdbc/lut2");
+DataSource ds = (DataSource) ctx.lookup("jdbc/lut2write");
 Connection connection = ds.getConnection();
 
 
@@ -55,6 +56,9 @@ if (newtype != null && uname != null){
 		
 		try {
 			settype.executeUpdate();
+			if(currentuname.equals(uname)){
+				session.setAttribute("type","2"); // set to regular user if self is demoted (can never promote self)
+			}
 		}
 		catch (Exception e){
 			if (connection != null){
@@ -63,7 +67,7 @@ if (newtype != null && uname != null){
 			pageContext.forward("lutadmin.jsp");
 		}
 		finally{
-			if(connetion != null){
+			if(connection != null){
 				connection.close();
 			}
 		}
